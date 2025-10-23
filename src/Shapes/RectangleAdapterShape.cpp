@@ -27,6 +27,17 @@ std::shared_ptr<sf::Shape> RectangleAdapterShape::GetShape() const
 {
   return m_rectangle.GetShape();
 }
+
+bool RectangleAdapterShape::Contains(const sf::Vector2f &point) const
+{
+  return m_rectangle.GetShape()->getGlobalBounds().contains(point);
+}
+
+void RectangleAdapterShape::Move(const sf::Vector2f &delta)
+{
+  m_rectangle.GetShape()->move(delta);
+}
+
 double RectangleAdapterShape::GetWidth() const
 {
   return m_width;

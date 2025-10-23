@@ -12,6 +12,8 @@ public:
   double GetPerimeter() const override;
   std::string ToString() const override;
   std::shared_ptr<sf::Shape> GetShape() const override;
+  bool Contains(const sf::Vector2f &point) const override;
+  void Move(const sf::Vector2f &delta) override;
 
   double GetWidth() const;
   double GetHeight() const;

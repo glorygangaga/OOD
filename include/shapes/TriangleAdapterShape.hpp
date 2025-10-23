@@ -13,6 +13,8 @@ public:
   std::string ToString() const override;
 
   std::shared_ptr<sf::Shape> GetShape() const override;
+  bool Contains(const sf::Vector2f &point) const override;
+  void Move(const sf::Vector2f &delta) override;
 
   sf::Vector2f GetP1() const;
   sf::Vector2f GetP2() const;

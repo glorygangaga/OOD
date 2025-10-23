@@ -35,6 +35,17 @@ std::shared_ptr<sf::Shape> TriangleAdapterShape::GetShape() const
 {
   return m_triangle.GetShape();
 }
+
+bool TriangleAdapterShape::Contains(const sf::Vector2f &point) const
+{
+  return m_triangle.GetShape()->getGlobalBounds().contains(point);
+}
+
+void TriangleAdapterShape::Move(const sf::Vector2f &delta)
+{
+  m_triangle.GetShape()->move(delta);
+}
+
 double TriangleAdapterShape::GetLineLength(const sf::Vector2f &position1, const sf::Vector2f &position2) const
 {
   const double powX = std::pow(position1.x - position2.x, 2);

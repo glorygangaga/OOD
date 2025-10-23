@@ -29,7 +29,7 @@ bool Application::ProcessInput()
 bool Application::PushNewShape(std::shared_ptr<IDrawableShape> shape)
 {
   m_output << shape->ToString();
-  m_canvas.PushShape(shape->GetShape());
+  m_canvas.PushShape(shape);
   return true;
 };
 

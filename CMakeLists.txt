@@ -14,6 +14,7 @@ add_executable(shapes
     src/Shapes/SFML/SfmlCircle.cpp
     src/Shapes/SFML/SfmlTriangle.cpp
     src/Shapes/SFML/SfmlRectangle.cpp
+    src/Shapes/CompositeShape.cpp
 )
 
 
