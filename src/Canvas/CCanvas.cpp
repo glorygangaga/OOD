@@ -29,75 +29,9 @@ bool CCanvas::HandleEvents()
     if (event.type == sf::Event::Closed)
       m_window.close();
 
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
-    {
-      sf::Vector2f clickPos = m_window.mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
-      bool shift = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
-      auto hit = hitTest(clickPos);
-
-      if (hit)
-      {
-        if (!shift)
-          m_selected.clear();
-
-        if (std::find(m_selected.begin(), m_selected.end(), hit) == m_selected.end())
-          m_selected.push_back(hit);
-
-        m_dragging = true;
-        m_lastMousePos = clickPos;
-      }
-      else if (!shift)
-        m_selected.clear();
-    }
-
-    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
-      m_dragging = false;
-
-    if (event.type == sf::Event::MouseMoved && m_dragging)
-    {
-      sf::Vector2f currPos = m_window.mapPixelToCoords({event.mouseMove.x, event.mouseMove.y});
-      sf::Vector2f delta = currPos - m_lastMousePos;
-
-      for (auto &s : m_selected)
-        s->Move(delta);
-
-      m_lastMousePos = currPos;
-    }
-
-    if (event.type == sf::Event::KeyPressed)
-    {
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
-      {
-        if (event.key.code == sf::Keyboard::G)
-        {
-          auto group = std::make_shared<CompositeShape>();
-          for (auto &s : m_selected)
-          {
-            group->Add(s);
-          }
-          m_shapes.push_back(group);
-          m_selected.clear();
-          m_selected.push_back(group);
-        }
-
-        if (event.key.code == sf::Keyboard::U)
-        {
-          std::vector<std::shared_ptr<IDrawableShape>> toAdd;
-          for (auto &s : m_selected)
-          {
-            auto g = std::dynamic_pointer_cast<CompositeShape>(s);
-            if (g)
-            {
-              for (auto &child : g->GetShapes())
-                toAdd.push_back(child);
-              m_shapes.erase(std::remove(m_shapes.begin(), m_shapes.end(), s), m_shapes.end());
-            }
-          }
-          m_shapes.insert(m_shapes.end(), toAdd.begin(), toAdd.end());
-          m_selected = toAdd;
-        }
-      }
-    }
+    HandleMouseDragEvent(event);
+    HandleDragEvent(event);
+    HandleGroupEvent(event);
   }
 
   return true;
@@ -132,6 +66,82 @@ bool CCanvas::Render()
   m_window.display();
 
   return true;
+}
+
+void CCanvas::HandleMouseDragEvent(const sf::Event &event)
+{
+  if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+  {
+    sf::Vector2f clickPos = m_window.mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
+    bool shift = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
+    auto hit = hitTest(clickPos);
+
+    if (hit)
+    {
+      if (!shift)
+        m_selected.clear();
+
+      if (std::find(m_selected.begin(), m_selected.end(), hit) == m_selected.end())
+        m_selected.push_back(hit);
+
+      m_dragging = true;
+      m_lastMousePos = clickPos;
+    }
+    else if (!shift)
+      m_selected.clear();
+  }
+
+  if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+    m_dragging = false;
+}
+
+void CCanvas::HandleGroupEvent(const sf::Event &event)
+{
+  if (event.type == sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+  {
+    if (event.key.code == sf::Keyboard::G)
+    {
+      auto group = std::make_shared<CompositeShape>();
+      for (auto &s : m_selected)
+      {
+        group->Add(s);
+      }
+      m_shapes.push_back(group);
+      m_selected.clear();
+      m_selected.push_back(group);
+    }
+
+    if (event.key.code == sf::Keyboard::U)
+    {
+      std::vector<std::shared_ptr<IDrawableShape>> toAdd;
+      for (auto &s : m_selected)
+      {
+        auto g = std::dynamic_pointer_cast<CompositeShape>(s);
+        if (g)
+        {
+          for (auto &child : g->GetShapes())
+            toAdd.push_back(child);
+          m_shapes.erase(std::remove(m_shapes.begin(), m_shapes.end(), s), m_shapes.end());
+        }
+      }
+      m_shapes.insert(m_shapes.end(), toAdd.begin(), toAdd.end());
+      m_selected = toAdd;
+    }
+  }
+}
+
+void CCanvas::HandleDragEvent(const sf::Event &event)
+{
+  if (event.type == sf::Event::MouseMoved && m_dragging)
+  {
+    sf::Vector2f currPos = m_window.mapPixelToCoords({event.mouseMove.x, event.mouseMove.y});
+    sf::Vector2f delta = currPos - m_lastMousePos;
+
+    for (auto &s : m_selected)
+      s->Move(delta);
+
+    m_lastMousePos = currPos;
+  }
 }
 
 std::shared_ptr<IDrawableShape> CCanvas::hitTest(const sf::Vector2f &point)

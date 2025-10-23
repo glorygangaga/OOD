@@ -23,6 +23,11 @@ private:
   bool m_dragging = false;
   sf::Vector2f m_lastMousePos;
   bool HandleEvents();
+
+  void HandleMouseDragEvent(const sf::Event &event);
+  void HandleGroupEvent(const sf::Event &event);
+  void HandleDragEvent(const sf::Event &event);
+
   bool Render();
 
   std::shared_ptr<IDrawableShape> hitTest(const sf::Vector2f &point);
