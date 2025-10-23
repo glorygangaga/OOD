@@ -1,0 +1,26 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(shapes)
+
+set(CMAKE_CXX_STANDARD 17)
+
+add_executable(shapes
+    main.cpp
+    src/app.cpp
+    src/Canvas/CCanvas.cpp
+    src/Shapes/CircleAdapterShape.cpp
+    src/Shapes/TriangleAdapterShape.cpp
+    src/Shapes/RectangleAdapterShape.cpp
+    src/Shapes/SFML/SfmlCircle.cpp
+    src/Shapes/SFML/SfmlTriangle.cpp
+    src/Shapes/SFML/SfmlRectangle.cpp
+)
+
+
+configure_file(input.txt ${CMAKE_CURRENT_BINARY_DIR}/input.txt COPYONLY)
+
+find_package(GTest REQUIRED)
+find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
+
+target_link_libraries(shapes sfml-graphics sfml-window sfml-system)
+target_include_directories(shapes PRIVATE ${CMAKE_SOURCE_DIR})
