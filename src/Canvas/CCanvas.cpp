@@ -32,9 +32,71 @@ bool CCanvas::HandleEvents()
     HandleMouseDragEvent(event);
     HandleDragEvent(event);
     HandleGroupEvent(event);
+    AddNewShape(event);
+    ChangeShape(event);
   }
 
   return true;
+}
+
+void CCanvas::AddNewShape(const sf::Event &event)
+{
+  if (event.type == sf::Event::KeyPressed)
+  {
+    sf::Vector2i pixelPos = sf::Mouse::getPosition(m_window);
+    sf::Vector2f mousePos = m_window.mapPixelToCoords(pixelPos);
+
+    std::shared_ptr<IDrawableShape> newShape;
+    if (event.key.code == sf::Keyboard::Num1)
+      newShape = std::make_shared<CircleAdapterShape>(mousePos, 50);
+    else if (event.key.code == sf::Keyboard::Num2)
+    {
+      const sf::Vector2f mousePosP2(mousePos.x, mousePos.y + 100);
+      const sf::Vector2f mousePosP3(mousePos.x + 100, mousePos.y + 50);
+      newShape = std::make_shared<TriangleAdapterShape>(mousePos, mousePosP2, mousePosP3);
+    }
+    else if (event.key.code == sf::Keyboard::Num3)
+    {
+      const sf::Vector2f mousePosP2(mousePos.x + 100, mousePos.y + 100);
+      newShape = std::make_shared<RectangleAdapterShape>(mousePos, mousePosP2);
+    }
+    else
+      return;
+
+    m_shapes.push_back(newShape);
+  }
+}
+
+void CCanvas::ChangeShape(const sf::Event &event)
+{
+  if (event.type == sf::Event::KeyPressed && !m_selected.empty() && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+  {
+    if (event.key.code == sf::Keyboard::C)
+      for (auto s : m_selected)
+      {
+        const sf::Color shapeColor = s->GetShape()->getFillColor();
+        s->GetShape()->setFillColor(GetNextColor(shapeColor));
+      }
+    else if (event.key.code == sf::Keyboard::X)
+      for (auto s : m_selected)
+      {
+        const sf::Color shapeColor = s->GetShape()->getOutlineColor();
+        s->GetShape()->setOutlineColor(GetNextColor(shapeColor));
+      }
+    else if (event.key.code == sf::Keyboard::Up)
+      for (auto s : m_selected)
+      {
+        const float thikness = s->GetShape()->getOutlineThickness();
+        s->GetShape()->setOutlineThickness(thikness + 1.0f);
+      }
+    else if (event.key.code == sf::Keyboard::Down)
+      for (auto s : m_selected)
+      {
+        const float thikness = s->GetShape()->getOutlineThickness();
+        if (thikness - 1 >= 0)
+          s->GetShape()->setOutlineThickness(thikness - 1.0f);
+      }
+  }
 }
 
 bool CCanvas::Render()
@@ -144,7 +206,30 @@ void CCanvas::HandleDragEvent(const sf::Event &event)
   }
 }
 
-std::shared_ptr<IDrawableShape> CCanvas::hitTest(const sf::Vector2f &point)
+sf::Color CCanvas::GetNextColor(const sf::Color &colorShape) const
+{
+  int current = static_cast<int>(GetEnumFromColor(colorShape));
+  int next = (current + 1) % SHAPE_COLORS_SIZE;
+
+  SHAPE_COLORS nextColorEnum = static_cast<SHAPE_COLORS>(next);
+  const auto it = COLORS_MAP.find(nextColorEnum);
+  if (it == COLORS_MAP.end())
+    return sf::Color::Transparent;
+
+  return it->second;
+}
+
+SHAPE_COLORS CCanvas::GetEnumFromColor(const sf::Color &color) const
+{
+  for (const auto &pair : COLORS_MAP)
+  {
+    if (pair.second == color)
+      return pair.first;
+  }
+  return SHAPE_COLORS::BLACK;
+}
+
+std::shared_ptr<IDrawableShape> CCanvas::hitTest(const sf::Vector2f &point) const
 {
   for (auto it = m_shapes.rbegin(); it != m_shapes.rend(); ++it)
   {

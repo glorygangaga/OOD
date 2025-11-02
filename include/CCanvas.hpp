@@ -3,8 +3,13 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
+#include <iostream>
 
 #include "include/shapes/CompositeShape.hpp"
+
+#include "include/shapes/CircleAdapterShape.hpp"
+#include "include/shapes/RectangleAdapterShape.hpp"
+#include "include/shapes/TriangleAdapterShape.hpp"
 
 class CCanvas
 {
@@ -22,13 +27,17 @@ private:
   std::vector<std::shared_ptr<IDrawableShape>> m_selected;
   bool m_dragging = false;
   sf::Vector2f m_lastMousePos;
+
   bool HandleEvents();
 
+  void AddNewShape(const sf::Event &event);
   void HandleMouseDragEvent(const sf::Event &event);
   void HandleGroupEvent(const sf::Event &event);
   void HandleDragEvent(const sf::Event &event);
-
+  void ChangeShape(const sf::Event &event);
   bool Render();
 
-  std::shared_ptr<IDrawableShape> hitTest(const sf::Vector2f &point);
+  sf::Color GetNextColor(const sf::Color &colorShape) const;
+  SHAPE_COLORS GetEnumFromColor(const sf::Color &color) const;
+  std::shared_ptr<IDrawableShape> hitTest(const sf::Vector2f &point) const;
 };

@@ -11,12 +11,27 @@
 class Application
 {
 public:
-  Application(const std::string &inputFileName, const std::string &outputFileName)
-      : m_input(inputFileName), m_output(outputFileName), m_canvas(window::SIZE, window::SIZE, window::NAME) {};
+  static Application &Instance()
+  {
+    static Application instance;
+    return instance;
+  }
 
   bool Start();
 
+  Application(const Application &) = delete;
+  Application(Application &&) = delete;
+  Application &operator=(const Application &) = delete;
+  Application &operator=(Application &&) = delete;
+
 private:
+  Application()
+      : m_input(inputs::INPUT_FILENAME),
+        m_output(inputs::OUTPUT_FILENAME),
+        m_canvas(window::SIZE, window::SIZE, window::NAME) {};
+
+  ~Application() = default;
+
   std::fstream m_input;
   std::ofstream m_output;
   CCanvas m_canvas;

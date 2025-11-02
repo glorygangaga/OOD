@@ -2,7 +2,6 @@
 
 int main()
 {
-  Application app(inputs::INPUT_FILENAME, inputs::OUTPUT_FILENAME);
-  app.Start();
+  Application::Instance().Start();
   return 0;
 }
