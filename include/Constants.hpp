@@ -67,3 +67,9 @@ const std::unordered_map<SHAPE_COLORS, sf::Color> COLORS_MAP = {
     {SHAPE_COLORS::YELLOW, sf::Color::Yellow},
     {SHAPE_COLORS::TRANSPARENT, sf::Color::Transparent},
 };
+
+enum class SHAPE_COLOR_CHANGE
+{
+  THICKNESS,
+  FILL,
+};

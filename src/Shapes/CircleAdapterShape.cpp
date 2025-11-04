@@ -33,11 +33,7 @@ double CircleAdapterShape::GetRadius() const
 
 bool CircleAdapterShape::Contains(const sf::Vector2f &point) const
 {
-  auto shape = m_circle.GetShape();
-  sf::Vector2f center = shape->getPosition();
-  float radius = shape->getGlobalBounds().width / 2.f;
-  sf::Vector2f diff = point - center;
-  return (diff.x * diff.x + diff.y * diff.y) <= radius * radius;
+  return GetShape()->getGlobalBounds().contains(point);
 }
 
 void CircleAdapterShape::Move(const sf::Vector2f &delta)

@@ -15,12 +15,17 @@ add_executable(shapes
     src/Shapes/SFML/SfmlTriangle.cpp
     src/Shapes/SFML/SfmlRectangle.cpp
     src/Shapes/CompositeShape.cpp
+    src/Canvas/tools/states/AddShapeState.cpp
+    src/Canvas/tools/states/ChangeColorShapeState.cpp
+    src/Canvas/tools/states/ChangeThicknessShapeState.cpp
+    src/Canvas/tools/commands/ChangeColorCommand.cpp
+    src/Canvas/tools/commands/AddShapeCommand.cpp
+    src/Canvas/tools/commands/ChangeThicknessCommand.cpp
 )
 
 
 configure_file(input.txt ${CMAKE_CURRENT_BINARY_DIR}/input.txt COPYONLY)
 
-find_package(GTest REQUIRED)
 find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
 target_link_libraries(shapes sfml-graphics sfml-window sfml-system)

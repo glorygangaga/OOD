@@ -1,4 +1,7 @@
 #include "include/CCanvas.hpp"
+#include "include/tools/states/ChangeColorShapeState.hpp"
+#include "include/tools/states/AddShapeState.hpp"
+#include "include/tools/states/ChangeThicknessShapeState.hpp"
 
 bool CCanvas::Draw()
 {
@@ -21,6 +24,13 @@ bool CCanvas::IsOpen() const
 {
   return m_window.isOpen();
 }
+
+sf::Vector2f CCanvas::GetMousePosition() const
+{
+  sf::Vector2i pixelPos = sf::Mouse::getPosition(m_window);
+  return m_window.mapPixelToCoords(pixelPos);
+}
+
 bool CCanvas::HandleEvents()
 {
   sf::Event event;
@@ -41,61 +51,31 @@ bool CCanvas::HandleEvents()
 
 void CCanvas::AddNewShape(const sf::Event &event)
 {
-  if (event.type == sf::Event::KeyPressed)
+  if (event.type == sf::Event::KeyPressed &&
+      (event.key.code == sf::Keyboard::Num1 || event.key.code == sf::Keyboard::Num2 || event.key.code == sf::Keyboard::Num3))
   {
-    sf::Vector2i pixelPos = sf::Mouse::getPosition(m_window);
-    sf::Vector2f mousePos = m_window.mapPixelToCoords(pixelPos);
-
-    std::shared_ptr<IDrawableShape> newShape;
-    if (event.key.code == sf::Keyboard::Num1)
-      newShape = std::make_shared<CircleAdapterShape>(mousePos, 50);
-    else if (event.key.code == sf::Keyboard::Num2)
-    {
-      const sf::Vector2f mousePosP2(mousePos.x, mousePos.y + 100);
-      const sf::Vector2f mousePosP3(mousePos.x + 100, mousePos.y + 50);
-      newShape = std::make_shared<TriangleAdapterShape>(mousePos, mousePosP2, mousePosP3);
-    }
-    else if (event.key.code == sf::Keyboard::Num3)
-    {
-      const sf::Vector2f mousePosP2(mousePos.x + 100, mousePos.y + 100);
-      newShape = std::make_shared<RectangleAdapterShape>(mousePos, mousePosP2);
-    }
-    else
-      return;
-
-    m_shapes.push_back(newShape);
+    SetTool(std::make_unique<AddShapeState>());
+    if (m_tool)
+      m_tool->HandleEvent(this, event);
   }
 }
 
 void CCanvas::ChangeShape(const sf::Event &event)
 {
-  if (event.type == sf::Event::KeyPressed && !m_selected.empty() && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+  if (event.type == sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
   {
-    if (event.key.code == sf::Keyboard::C)
-      for (auto s : m_selected)
-      {
-        const sf::Color shapeColor = s->GetShape()->getFillColor();
-        s->GetShape()->setFillColor(GetNextColor(shapeColor));
-      }
-    else if (event.key.code == sf::Keyboard::X)
-      for (auto s : m_selected)
-      {
-        const sf::Color shapeColor = s->GetShape()->getOutlineColor();
-        s->GetShape()->setOutlineColor(GetNextColor(shapeColor));
-      }
-    else if (event.key.code == sf::Keyboard::Up)
-      for (auto s : m_selected)
-      {
-        const float thikness = s->GetShape()->getOutlineThickness();
-        s->GetShape()->setOutlineThickness(thikness + 1.0f);
-      }
-    else if (event.key.code == sf::Keyboard::Down)
-      for (auto s : m_selected)
-      {
-        const float thikness = s->GetShape()->getOutlineThickness();
-        if (thikness - 1 >= 0)
-          s->GetShape()->setOutlineThickness(thikness - 1.0f);
-      }
+    if (event.key.code == sf::Keyboard::C || event.key.code == sf::Keyboard::X)
+    {
+      SetTool(std::make_unique<ChangeColorShapeState>());
+      if (m_tool)
+        m_tool->HandleEvent(this, event);
+    }
+    if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::Down)
+    {
+      SetTool(std::make_unique<ChangeThicknessShapeState>());
+      if (m_tool)
+        m_tool->HandleEvent(this, event);
+    }
   }
 }
 
@@ -103,16 +83,16 @@ bool CCanvas::Render()
 {
   m_window.clear(sf::Color::Black);
 
-  for (auto &shape : m_shapes)
+  for (const auto &shape : m_shapes)
   {
-    auto drawable = shape->GetShape();
+    const auto drawable = shape->GetShape();
     if (drawable)
       m_window.draw(*drawable);
   }
 
-  for (auto &s : m_selected)
+  for (const auto &s : m_selected)
   {
-    auto drawable = s->GetShape();
+    const auto drawable = s->GetShape();
     if (!drawable)
       continue;
 
@@ -134,9 +114,9 @@ void CCanvas::HandleMouseDragEvent(const sf::Event &event)
 {
   if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
   {
-    sf::Vector2f clickPos = m_window.mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
-    bool shift = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
-    auto hit = hitTest(clickPos);
+    const sf::Vector2f clickPos = m_window.mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
+    const bool shift = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
+    const auto hit = hitTest(clickPos);
 
     if (hit)
     {
@@ -164,10 +144,8 @@ void CCanvas::HandleGroupEvent(const sf::Event &event)
     if (event.key.code == sf::Keyboard::G)
     {
       auto group = std::make_shared<CompositeShape>();
-      for (auto &s : m_selected)
-      {
+      for (const auto &s : m_selected)
         group->Add(s);
-      }
       m_shapes.push_back(group);
       m_selected.clear();
       m_selected.push_back(group);
@@ -181,7 +159,7 @@ void CCanvas::HandleGroupEvent(const sf::Event &event)
         auto g = std::dynamic_pointer_cast<CompositeShape>(s);
         if (g)
         {
-          for (auto &child : g->GetShapes())
+          for (const auto &child : g->GetShapes())
             toAdd.push_back(child);
           m_shapes.erase(std::remove(m_shapes.begin(), m_shapes.end(), s), m_shapes.end());
         }
@@ -199,38 +177,18 @@ void CCanvas::HandleDragEvent(const sf::Event &event)
     sf::Vector2f currPos = m_window.mapPixelToCoords({event.mouseMove.x, event.mouseMove.y});
     sf::Vector2f delta = currPos - m_lastMousePos;
 
-    for (auto &s : m_selected)
+    for (const auto &s : m_selected)
       s->Move(delta);
 
     m_lastMousePos = currPos;
   }
 }
 
-sf::Color CCanvas::GetNextColor(const sf::Color &colorShape) const
-{
-  int current = static_cast<int>(GetEnumFromColor(colorShape));
-  int next = (current + 1) % SHAPE_COLORS_SIZE;
-
-  SHAPE_COLORS nextColorEnum = static_cast<SHAPE_COLORS>(next);
-  const auto it = COLORS_MAP.find(nextColorEnum);
-  if (it == COLORS_MAP.end())
-    return sf::Color::Transparent;
-
-  return it->second;
-}
-
-SHAPE_COLORS CCanvas::GetEnumFromColor(const sf::Color &color) const
-{
-  for (const auto &pair : COLORS_MAP)
-  {
-    if (pair.second == color)
-      return pair.first;
-  }
-  return SHAPE_COLORS::BLACK;
-}
-
 std::shared_ptr<IDrawableShape> CCanvas::hitTest(const sf::Vector2f &point) const
 {
+  if (m_shapes.empty())
+    return nullptr;
+
   for (auto it = m_shapes.rbegin(); it != m_shapes.rend(); ++it)
   {
     const sf::FloatRect bounds = (*it)->GetShape()->getGlobalBounds();
@@ -239,4 +197,41 @@ std::shared_ptr<IDrawableShape> CCanvas::hitTest(const sf::Vector2f &point) cons
   }
 
   return nullptr;
+}
+
+std::shared_ptr<IDrawableShape> CCanvas::GetShapeByHit(const sf::Vector2f &point) const
+{
+  for (auto it = m_shapes.rbegin(); it != m_shapes.rend(); ++it)
+  {
+    auto shape = *it;
+
+    auto group = std::dynamic_pointer_cast<CompositeShape>(shape);
+    if (group)
+    {
+      for (auto rit = group->GetShapes().rbegin(); rit != group->GetShapes().rend(); ++rit)
+      {
+        if ((*rit)->Contains(point))
+          return *rit;
+      }
+      if (shape->Contains(point))
+        return shape;
+    }
+    else
+    {
+      if (shape->Contains(point))
+        return shape;
+    }
+  }
+
+  return nullptr;
+}
+
+void CCanvas::ExecuteCommand(std::unique_ptr<ICommand> cmd)
+{
+  cmd->Execute();
+}
+
+void CCanvas::SetTool(std::unique_ptr<IToolState> tool)
+{
+  m_tool = std::move(tool);
 }

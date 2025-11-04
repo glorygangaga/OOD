@@ -1,9 +1,9 @@
 #pragma once
 
-#include <iostream>
 #include <fstream>
 
 #include "include/CCanvas.hpp"
+
 #include "include/shapes/CircleAdapterShape.hpp"
 #include "include/shapes/TriangleAdapterShape.hpp"
 #include "include/shapes/RectangleAdapterShape.hpp"
