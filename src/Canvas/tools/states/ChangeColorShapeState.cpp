@@ -1,4 +1,5 @@
 #include "include/tools/states/ChangeColorShapeState.hpp"
+#include <iostream>
 
 void ChangeColorShapeState::HandleEvent(CCanvas *canvas, const sf::Event &event)
 {

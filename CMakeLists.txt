@@ -18,9 +18,11 @@ add_executable(shapes
     src/Canvas/tools/states/AddShapeState.cpp
     src/Canvas/tools/states/ChangeColorShapeState.cpp
     src/Canvas/tools/states/ChangeThicknessShapeState.cpp
+    src/Canvas/tools/states/DragState.cpp
     src/Canvas/tools/commands/ChangeColorCommand.cpp
     src/Canvas/tools/commands/AddShapeCommand.cpp
     src/Canvas/tools/commands/ChangeThicknessCommand.cpp
+    src/Canvas/tools/commands/DragCommand.cpp
 )
 
 

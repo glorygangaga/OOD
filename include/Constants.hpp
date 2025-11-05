@@ -7,6 +7,8 @@ namespace window
 {
   const unsigned int SIZE = 700;
   const std::string NAME = "Window";
+
+  const float frame_thickness = 2.f;
 }
 
 namespace inputs
@@ -73,3 +75,11 @@ enum class SHAPE_COLOR_CHANGE
   THICKNESS,
   FILL,
 };
+
+enum class MODE
+{
+  DND,
+  SHAPE_CHANGE,
+};
+
+const int MODE_SIZE = 2;
