@@ -5,13 +5,15 @@
 #include "include/Constants.hpp"
 #include "include/CCanvas.hpp"
 #include "include/tools/commands/ChangeColorCommand.hpp"
+#include "include/tools/commands/ChangeColorCommandFill.hpp"
 
 class ChangeColorShapeState : public IToolState
 {
 public:
-  void HandleEvent(CCanvas *canvas, const sf::Event &event) override;
+  ChangeColorShapeState(const sf::Color &color) : m_color(color) {};
+
+  void HandleEvent(CCanvas *canvas) override;
 
 private:
-  sf::Color GetNextColor(const sf::Color &colorShape) const;
-  SHAPE_COLORS GetEnumFromColor(const sf::Color &color) const;
+  sf::Color m_color;
 };

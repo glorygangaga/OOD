@@ -1,24 +1,8 @@
 #include "include/tools/states/DragState.hpp"
 
-void DragState::HandleEvent(CCanvas *canvas, const sf::Event &event)
+void DragState::HandleEvent(CCanvas *canvas)
 {
-  if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
-  {
-    sf::Vector2f clickPos = canvas->GetMousePosition();
-    bool shift = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
-    auto hit = canvas->hitTest(clickPos);
-
-    if (hit)
-    {
-      if (!shift)
-        canvas->ClearSelected();
-
-      canvas->SelectShape(hit);
-      canvas->StartDragging(clickPos);
-    }
-    else if (!shift)
-      canvas->ClearSelected();
-  }
+  const sf::Event event = canvas->GetEvent();
 
   if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
     canvas->StopDragging();
@@ -27,6 +11,8 @@ void DragState::HandleEvent(CCanvas *canvas, const sf::Event &event)
   {
     sf::Vector2f currPos = canvas->GetMousePosition();
     sf::Vector2f delta = currPos - canvas->GetLastMousePos();
+    if (delta.x > 10 && delta.y > 10)
+      return;
 
     for (const auto &s : canvas->GetSelected())
       canvas->ExecuteCommand(std::make_unique<DragCommand>(s, delta));

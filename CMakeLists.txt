@@ -19,14 +19,19 @@ add_executable(shapes
     src/Canvas/tools/states/ChangeColorShapeState.cpp
     src/Canvas/tools/states/ChangeThicknessShapeState.cpp
     src/Canvas/tools/states/DragState.cpp
+    src/Canvas/tools/states/ChangeColorThickness.cpp
     src/Canvas/tools/commands/ChangeColorCommand.cpp
     src/Canvas/tools/commands/AddShapeCommand.cpp
     src/Canvas/tools/commands/ChangeThicknessCommand.cpp
     src/Canvas/tools/commands/DragCommand.cpp
+    src/Canvas/tools/commands/ChangeColorCommandFill.cpp
+    src/Canvas/ui/button/Button.cpp
+    src/Canvas/ui/Panel.cpp
 )
 
 
 configure_file(input.txt ${CMAKE_CURRENT_BINARY_DIR}/input.txt COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/include/ui/font/arialmt.ttf ${CMAKE_CURRENT_BINARY_DIR}/arialmt.ttf COPYONLY)
 
 find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 

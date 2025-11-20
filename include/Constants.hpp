@@ -2,10 +2,11 @@
 
 #include <string>
 #include <unordered_map>
+#include <map>
 
 namespace window
 {
-  const unsigned int SIZE = 700;
+  const unsigned int SIZE = 1000;
   const std::string NAME = "Window";
 
   const float frame_thickness = 2.f;
@@ -49,37 +50,39 @@ const std::unordered_map<std::string, SHAPES_TYPE> SHAPES_MAP = {
     {inputs::CIRCLE, SHAPES_TYPE::CIRCLE_T},
     {inputs::TRIANGLE, SHAPES_TYPE::TRIANGLE_T}};
 
-enum class SHAPE_COLORS
+enum class Action
 {
-  RED,
-  BLUE,
-  BLACK,
-  WHITE,
-  YELLOW,
-  TRANSPARENT
+  SwitchMode,
+  Thick1,
+  Thick3,
+  Thick5,
+  ColorRed,
+  ColorBlue,
+  ColorWhite,
+  ColorBlack,
+  FillColorRed,
+  FillColorBlue,
+  FillColorWhite,
+  FillColorBlack,
+  AddRectangle,
+  AddTriangle,
+  AddCircle
 };
 
-const int SHAPE_COLORS_SIZE = 6;
-
-const std::unordered_map<SHAPE_COLORS, sf::Color> COLORS_MAP = {
-    {SHAPE_COLORS::RED, sf::Color::Red},
-    {SHAPE_COLORS::BLUE, sf::Color::Blue},
-    {SHAPE_COLORS::BLACK, sf::Color::Black},
-    {SHAPE_COLORS::WHITE, sf::Color::White},
-    {SHAPE_COLORS::YELLOW, sf::Color::Yellow},
-    {SHAPE_COLORS::TRANSPARENT, sf::Color::Transparent},
+const std::vector<std::pair<sf::String, Action>> BUTTONS = {
+    {"Switch mode", Action::SwitchMode},
+    {"Thickness 1", Action::Thick1},
+    {"Thickness 3", Action::Thick3},
+    {"Thickness 5", Action::Thick5},
+    {"Color red", Action::ColorRed},
+    {"Color blue", Action::ColorBlue},
+    {"Color white", Action::ColorWhite},
+    {"Color black", Action::ColorBlack},
+    {"Thick red", Action::FillColorRed},
+    {"Thick blue", Action::FillColorBlue},
+    {"Thick white", Action::FillColorWhite},
+    {"Thick black", Action::FillColorBlack},
+    {"Triangle", Action::AddTriangle},
+    {"Rectangle", Action::AddRectangle},
+    {"Circle", Action::AddCircle},
 };
-
-enum class SHAPE_COLOR_CHANGE
-{
-  THICKNESS,
-  FILL,
-};
-
-enum class MODE
-{
-  DND,
-  SHAPE_CHANGE,
-};
-
-const int MODE_SIZE = 2;

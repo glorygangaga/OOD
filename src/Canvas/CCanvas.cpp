@@ -1,8 +1,6 @@
 #include "include/CCanvas.hpp"
-#include "include/tools/states/ChangeColorShapeState.hpp"
-#include "include/tools/states/AddShapeState.hpp"
-#include "include/tools/states/ChangeThicknessShapeState.hpp"
 #include "include/tools/states/DragState.hpp"
+#include "include/tools/states/AddShapeState.hpp"
 
 bool CCanvas::Draw()
 {
@@ -35,72 +33,70 @@ sf::Vector2f CCanvas::GetMousePosition() const
 bool CCanvas::HandleEvents()
 {
   sf::Event event;
+
   while (m_window.pollEvent(event))
   {
     if (event.type == sf::Event::Closed)
       m_window.close();
+    SetEvent(event);
+    SelectEvent(event);
 
-    ChangeMode(event);
-    AddNewShape(event);
-    switch (m_mode)
-    {
-    case MODE::SHAPE_CHANGE:
-      ChangeShape(event);
-      break;
-    case MODE::DND:
-      if (!dynamic_cast<DragState *>(m_tool.get()))
-        SetTool(std::make_unique<DragState>());
-      break;
-    }
+    m_panel.HandleMouseEvent(event);
 
     if (m_tool)
-      m_tool->HandleEvent(this, event);
+    {
+      m_tool->HandleEvent(this);
+      if (!m_panel.IsDragMode())
+        SetTool(nullptr);
+    }
   }
 
   return true;
 }
 
-void CCanvas::ChangeMode(const sf::Event &event)
+void CCanvas::SelectEvent(const sf::Event &event)
 {
-  if (event.type == sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && event.key.code == sf::Keyboard::V)
+  if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
   {
-    const int current = static_cast<int>(m_mode);
-    const int next = (current + 1) % MODE_SIZE;
-    m_mode = static_cast<MODE>(next);
+    sf::Vector2f clickPos = GetMousePosition();
+    bool shift = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
+    auto hit = hitTest(clickPos);
+    const sf::Vector2f panelSize = m_panel.GetPanelSize();
 
-    switch (m_mode)
+    if (clickPos.y <= panelSize.y)
+      return;
+
+    if (hit)
     {
-    case MODE::SHAPE_CHANGE:
-      ClearSelected();
-      ClearTool();
-      break;
-    case MODE::DND:
-      SetTool(std::make_unique<DragState>());
-      break;
+      if (!shift)
+        ClearSelected();
+
+      SelectShape(hit);
+      StartDragging(clickPos);
     }
+    else if (!shift)
+      ClearSelected();
   }
 }
 
-void CCanvas::AddNewShape(const sf::Event &event)
+std::vector<std::shared_ptr<IDrawableShape>> CCanvas::GetAllSelectedShapes()
 {
-  if (event.type == sf::Event::KeyPressed &&
-      (event.key.code == sf::Keyboard::Num1 || event.key.code == sf::Keyboard::Num2 || event.key.code == sf::Keyboard::Num3))
-  {
-    SetTool(std::make_unique<AddShapeState>());
-    if (m_tool)
-      m_tool->HandleEvent(this, event);
-  }
+  auto shapes = GetSelected();
+  std::vector<std::shared_ptr<IDrawableShape>> result;
+
+  for (const auto &s : shapes)
+    CollectShapes(s, result);
+  return result;
 }
 
-void CCanvas::ChangeShape(const sf::Event &event)
+void CCanvas::CollectShapes(const std::shared_ptr<IDrawableShape> &shape, std::vector<std::shared_ptr<IDrawableShape>> &outShapes)
 {
-  if (event.type == sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
-  {
-    if (event.key.code == sf::Keyboard::C || event.key.code == sf::Keyboard::X)
-      SetTool(std::make_unique<ChangeColorShapeState>());
-    if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::Down)
-      SetTool(std::make_unique<ChangeThicknessShapeState>());
-  }
+  auto group = std::dynamic_pointer_cast<CompositeShape>(shape);
+  if (group)
+    for (const auto &s : group->GetShapes())
+      CollectShapes(s, outShapes);
+  else
+    outShapes.push_back(shape);
 }
 
 bool CCanvas::Render()
@@ -124,7 +120,7 @@ bool CCanvas::Render()
     const sf::RectangleShape frame = RenderFrame(bounds);
     m_window.draw(frame);
   }
-
+  m_panel.DrawPanel();
   m_window.display();
 
   return true;
@@ -150,33 +146,6 @@ std::shared_ptr<IDrawableShape> CCanvas::hitTest(const sf::Vector2f &point) cons
     const sf::FloatRect bounds = (*it)->GetShape()->getGlobalBounds();
     if (bounds.contains(point))
       return *it;
-  }
-
-  return nullptr;
-}
-
-std::shared_ptr<IDrawableShape> CCanvas::GetShapeByHit(const sf::Vector2f &point) const
-{
-  if (m_shapes.empty())
-    return nullptr;
-
-  for (auto it = m_shapes.rbegin(); it != m_shapes.rend(); ++it)
-  {
-    auto shape = *it;
-
-    auto group = std::dynamic_pointer_cast<CompositeShape>(shape);
-    if (group)
-    {
-      for (auto rit = group->GetShapes().rbegin(); rit != group->GetShapes().rend(); ++rit)
-      {
-        if ((*rit)->GetShape()->getGlobalBounds().contains(point))
-          return *rit;
-      }
-      if (shape->Contains(point))
-        return shape;
-    }
-    else if (shape->Contains(point))
-      return shape;
   }
 
   return nullptr;
@@ -265,4 +234,19 @@ void CCanvas::UngroupSelected()
   }
   m_shapes.insert(m_shapes.end(), toAdd.begin(), toAdd.end());
   m_selected = toAdd;
+}
+
+sf::Event CCanvas::GetEvent() const
+{
+  return m_event;
+}
+
+std::unique_ptr<IToolState> CCanvas::GetTool()
+{
+  return std::move(m_tool);
+}
+
+void CCanvas::SetEvent(const sf::Event &event)
+{
+  m_event = event;
 }

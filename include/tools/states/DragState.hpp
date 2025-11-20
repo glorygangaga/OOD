@@ -6,5 +6,5 @@
 class DragState : public IToolState
 {
 public:
-  void HandleEvent(CCanvas *canvas, const sf::Event &event) override;
+  void HandleEvent(CCanvas *canvas) override;
 };
