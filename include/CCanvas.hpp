@@ -18,44 +18,43 @@ public:
                                                                    { this->SetTool(std::move(tool)); }) {};
 
   bool Draw();
-  bool PushShape(const std::shared_ptr<IDrawableShape> &shape);
   bool IsOpen() const;
+  bool IsDragging() const;
+  bool PushShape(const std::shared_ptr<IDrawableShape> &shape);
 
+  sf::Event GetEvent() const;
   sf::Vector2f GetMousePosition() const;
-  std::shared_ptr<IDrawableShape> hitTest(const sf::Vector2f &point) const;
+  sf::Vector2f GetLastMousePos() const;
+  std::vector<std::shared_ptr<IDrawableShape>> GetSelected() const;
   std::vector<std::shared_ptr<IDrawableShape>> GetAllSelectedShapes();
   void ExecuteCommand(std::unique_ptr<ICommand> cmd);
 
-  void ClearSelected();
-  void StartDragging(const sf::Vector2f &pos);
   void StopDragging();
-  bool IsDragging() const;
-  void SetLastMousePos(const sf::Vector2f &pos);
-  sf::Vector2f GetLastMousePos() const;
   void GroupSelected();
   void UngroupSelected();
-  void SelectShape(const std::shared_ptr<IDrawableShape> &shape);
-  std::vector<std::shared_ptr<IDrawableShape>> GetSelected() const;
-  sf::Event GetEvent() const;
-  std::unique_ptr<IToolState> GetTool();
+  void SetLastMousePos(const sf::Vector2f &pos);
 
 private:
-  sf::RenderWindow m_window;
-  std::vector<std::shared_ptr<IDrawableShape>> m_shapes;
-  std::vector<std::shared_ptr<IDrawableShape>> m_selected;
-  bool m_dragging = false;
-  sf::Vector2f m_lastMousePos;
-  std::unique_ptr<IToolState> m_tool;
   Panel m_panel;
   sf::Event m_event;
+  bool m_dragging = false;
+  sf::RenderWindow m_window;
+  sf::Vector2f m_lastMousePos;
+  std::unique_ptr<IToolState> m_tool;
+  std::vector<std::shared_ptr<IDrawableShape>> m_shapes;
+  std::vector<std::shared_ptr<IDrawableShape>> m_selected;
 
   bool HandleEvents();
-  void SetEvent(const sf::Event &event);
-  void SetTool(std::unique_ptr<IToolState> tool);
   void ClearTool();
   bool Render();
 
-  sf::RectangleShape RenderFrame(const sf::FloatRect &bounds) const;
+  void ClearSelected();
+  void SetEvent(const sf::Event &event);
   void SelectEvent(const sf::Event &event);
+  void StartDragging(const sf::Vector2f &pos);
+  void SetTool(std::unique_ptr<IToolState> tool);
+  void SelectShape(const std::shared_ptr<IDrawableShape> &shape);
+  sf::RectangleShape RenderFrame(const sf::FloatRect &bounds) const;
+  std::shared_ptr<IDrawableShape> hitTest(const sf::Vector2f &point) const;
   void CollectShapes(const std::shared_ptr<IDrawableShape> &shape, std::vector<std::shared_ptr<IDrawableShape>> &outShapes);
 };

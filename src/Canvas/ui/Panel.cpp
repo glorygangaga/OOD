@@ -76,13 +76,13 @@ std::unique_ptr<IToolState> Panel::GetState(const enum Action &action)
   {
     m_dragMode = !m_dragMode;
     if (m_dragMode)
-      return std::make_unique<DragState>();
+      return std::make_unique<DragState>(GetPanelSize());
     else
       return nullptr;
   }
 
   if (m_dragMode)
-    return std::make_unique<DragState>();
+    return std::make_unique<DragState>(GetPanelSize());
 
   switch (action)
   {

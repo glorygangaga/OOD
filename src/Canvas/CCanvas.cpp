@@ -40,7 +40,6 @@ bool CCanvas::HandleEvents()
       m_window.close();
     SetEvent(event);
     SelectEvent(event);
-
     m_panel.HandleMouseEvent(event);
 
     if (m_tool)
@@ -239,11 +238,6 @@ void CCanvas::UngroupSelected()
 sf::Event CCanvas::GetEvent() const
 {
   return m_event;
-}
-
-std::unique_ptr<IToolState> CCanvas::GetTool()
-{
-  return std::move(m_tool);
 }
 
 void CCanvas::SetEvent(const sf::Event &event)
