@@ -1,6 +1,22 @@
 #include "include/tools/commands/ChangeColorCommandFill.hpp"
 
+ChangeColorCommandFill::ChangeColorCommandFill(const std::vector<std::shared_ptr<IDrawableShape>> &shapes, const sf::Color &newColor)
+    : m_shapes(shapes), m_newColor(newColor)
+{
+  for (auto &s : shapes)
+    m_before.push_back(s->SaveState());
+}
+
 void ChangeColorCommandFill::Execute()
 {
-  m_shape->GetShape()->setFillColor(m_newColor);
+  ColorChangeVisitor visitor(m_newColor);
+  for (auto &s : m_shapes)
+    s->Accept(visitor);
+}
+
+void ChangeColorCommandFill::Undo()
+{
+  ColorChangeVisitor visitor(m_before[0].GetFillColor());
+  for (auto &s : m_shapes)
+    s->Accept(visitor);
 }

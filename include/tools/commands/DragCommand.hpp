@@ -7,12 +7,12 @@
 class DragCommand : public ICommand
 {
 public:
-  DragCommand(std::shared_ptr<IDrawableShape> shape, const sf::Vector2f &delta)
-      : m_shape(shape), m_delta(delta) {}
+  DragCommand(const std::vector<std::shared_ptr<IDrawableShape>> &shapes);
 
   void Execute() override;
+  void Undo() override;
 
 private:
-  sf::Vector2f m_delta;
-  std::shared_ptr<IDrawableShape> m_shape;
+  std::vector<std::shared_ptr<IDrawableShape>> m_shapes;
+  std::vector<ShapeMemento> m_before;
 };

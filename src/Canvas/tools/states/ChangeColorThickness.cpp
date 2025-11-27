@@ -7,6 +7,5 @@ void ChangeColorThickness::HandleEvent(CCanvas *canvas)
   if (shapes.empty())
     return;
 
-  for (const auto s : shapes)
-    canvas->ExecuteCommand(std::make_unique<ChangeColorCommand>(s, m_color));
+  canvas->ExecuteCommand(std::make_unique<ChangeColorCommand>(shapes, m_color));
 }

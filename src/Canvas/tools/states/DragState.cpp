@@ -4,15 +4,21 @@ void DragState::HandleEvent(CCanvas *canvas)
 {
   const sf::Event event = canvas->GetEvent();
 
-  if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
-    canvas->StopDragging();
+  if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left && canvas->IsDragging())
+  {
+    auto shapes = canvas->GetSelected();
+    if (!shapes.empty())
+      m_activeCommand = std::make_unique<DragCommand>(shapes);
+
+    return;
+  }
 
   if (event.type == sf::Event::MouseMoved && canvas->IsDragging())
   {
     sf::Vector2f currPos = canvas->GetMousePosition();
     sf::Vector2f delta = currPos - canvas->GetLastMousePos();
 
-    for (const auto &s : canvas->GetSelected())
+    for (auto &s : canvas->GetSelected())
     {
       const sf::FloatRect bounds = s->GetShape()->getGlobalBounds();
 
@@ -21,17 +27,26 @@ void DragState::HandleEvent(CCanvas *canvas)
       if (bounds.left + delta.x <= 0 || bounds.left + delta.x + bounds.width >= window::SIZE)
         delta.x = 0;
 
-      canvas->ExecuteCommand(std::make_unique<DragCommand>(s, delta));
+      s->Move(delta);
     }
 
     canvas->SetLastMousePos(currPos);
+    return;
+  }
+
+  if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+  {
+    if (m_activeCommand)
+      canvas->ExecuteCommand(std::move(m_activeCommand));
+
+    return;
   }
 
   if (event.type == sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
   {
     if (event.key.code == sf::Keyboard::G)
-      canvas->GroupSelected();
+      canvas->ExecuteCommand(std::make_unique<GroupShapesCommand>(canvas));
     if (event.key.code == sf::Keyboard::U)
-      canvas->UngroupSelected();
+      canvas->ExecuteCommand(std::make_unique<UngroupShapesCommand>(canvas));
   }
 }

@@ -25,8 +25,14 @@ add_executable(shapes
     src/Canvas/tools/commands/ChangeThicknessCommand.cpp
     src/Canvas/tools/commands/DragCommand.cpp
     src/Canvas/tools/commands/ChangeColorCommandFill.cpp
+    src/Canvas/tools/commands/UngroupShapesCommand.cpp
+    src/Canvas/tools/commands/GroupShapesCommand.cpp
     src/Canvas/ui/button/Button.cpp
     src/Canvas/ui/Panel.cpp
+    src/Shapes/Visitor/ColorChangeVisitor.cpp
+    src/Shapes/Visitor/ThicknessChangeVisitor.cpp
+    src/Shapes/Visitor/OutlineColorChangeVisitor.cpp
+    src/Shapes/ShapeMemento.cpp
 )
 
 

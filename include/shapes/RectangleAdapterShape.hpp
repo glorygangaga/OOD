@@ -14,6 +14,9 @@ public:
   std::shared_ptr<sf::Shape> GetShape() const override;
   bool Contains(const sf::Vector2f &point) const override;
   void Move(const sf::Vector2f &delta) override;
+  void Accept(IShapeVisitor &visitor) override;
+  ShapeMemento SaveState() const override;
+  void RestoreState(const ShapeMemento &lastState) override;
 
   double GetWidth() const;
   double GetHeight() const;

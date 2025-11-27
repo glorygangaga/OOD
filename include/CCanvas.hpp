@@ -13,14 +13,13 @@
 class CCanvas
 {
 public:
-  CCanvas(const unsigned int width, const unsigned int height, const std::string &titleName)
-      : m_window(sf::VideoMode(width, height), titleName), m_panel(m_window, [this](std::unique_ptr<IToolState> tool)
-                                                                   { this->SetTool(std::move(tool)); }) {};
+  CCanvas(const unsigned int width, const unsigned int height, const std::string &titleName);
 
   bool Draw();
   bool IsOpen() const;
   bool IsDragging() const;
   bool PushShape(const std::shared_ptr<IDrawableShape> &shape);
+  bool RemoveShape(const std::shared_ptr<IDrawableShape> &shape);
 
   sf::Event GetEvent() const;
   sf::Vector2f GetMousePosition() const;
@@ -31,7 +30,9 @@ public:
 
   void StopDragging();
   void GroupSelected();
+  std::shared_ptr<CompositeShape> GroupShapes(const std::vector<std::shared_ptr<IDrawableShape>> &shapes);
   void UngroupSelected();
+  void UngroupShapes(const std::vector<std::shared_ptr<IDrawableShape>> &shapes);
   void SetLastMousePos(const sf::Vector2f &pos);
 
 private:
@@ -43,6 +44,7 @@ private:
   std::unique_ptr<IToolState> m_tool;
   std::vector<std::shared_ptr<IDrawableShape>> m_shapes;
   std::vector<std::shared_ptr<IDrawableShape>> m_selected;
+  std::vector<std::unique_ptr<ICommand>> cmds;
 
   bool HandleEvents();
   void ClearTool();

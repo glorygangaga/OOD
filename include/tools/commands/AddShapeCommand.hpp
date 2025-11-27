@@ -11,6 +11,7 @@ public:
       : m_canvas(canvas), m_shape(shape) {}
 
   void Execute() override;
+  void Undo() override;
 
 private:
   CCanvas *m_canvas;

@@ -58,6 +58,21 @@ std::string CompositeShape::ToString() const
   return out + "]";
 }
 
+void CompositeShape::Accept(IShapeVisitor &visitor)
+{
+  return;
+}
+
+ShapeMemento CompositeShape::SaveState() const
+{
+  return ShapeMemento();
+}
+
+void CompositeShape::RestoreState(const ShapeMemento &lastState)
+{
+  return;
+}
+
 sf::FloatRect CompositeShape::GetBounds() const
 {
   if (m_shapes.empty())

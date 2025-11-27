@@ -38,6 +38,36 @@ void RectangleAdapterShape::Move(const sf::Vector2f &delta)
   m_rectangle.GetShape()->move(delta);
 }
 
+void RectangleAdapterShape::Accept(IShapeVisitor &visitor)
+{
+  visitor.Visit(*this);
+}
+
+ShapeMemento RectangleAdapterShape::SaveState() const
+{
+  ShapeMemento state;
+  const std::shared_ptr<sf::Shape> s = m_rectangle.GetShape();
+
+  state.SetFillColor(s->getFillColor());
+  state.SetOutlineColor(s->getOutlineColor());
+  state.SetThickness(s->getOutlineThickness());
+  state.SetTransform(s->getTransform());
+
+  return state;
+}
+
+void RectangleAdapterShape::RestoreState(const ShapeMemento &lastState)
+{
+  const std::shared_ptr<sf::Shape> s = m_rectangle.GetShape();
+
+  s->setFillColor(lastState.GetFillColor());
+  s->setOutlineColor(lastState.GetOutlineColor());
+  s->setOutlineThickness(lastState.GetThickness());
+
+  sf::Vector2f pos = lastState.GetTransform().transformPoint({0.f, 0.f});
+  s->setPosition(pos);
+}
+
 double RectangleAdapterShape::GetWidth() const
 {
   return m_width;

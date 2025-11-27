@@ -2,6 +2,13 @@
 #include "include/tools/states/DragState.hpp"
 #include "include/tools/states/AddShapeState.hpp"
 
+CCanvas::CCanvas(const unsigned int width, const unsigned int height, const std::string &titleName)
+    : m_window(sf::VideoMode(width, height), titleName), m_panel(m_window, [this](std::unique_ptr<IToolState> tool)
+                                                                 { this->SetTool(std::move(tool)); })
+{
+  m_window.setFramerateLimit(60);
+};
+
 bool CCanvas::Draw()
 {
   while (IsOpen())
@@ -17,6 +24,21 @@ bool CCanvas::PushShape(const std::shared_ptr<IDrawableShape> &shape)
 {
   m_shapes.push_back(shape);
   return true;
+}
+
+bool CCanvas::RemoveShape(const std::shared_ptr<IDrawableShape> &shape)
+{
+  if (m_shapes.empty())
+    return false;
+
+  std::vector<std::shared_ptr<IDrawableShape>>::iterator pos = std::find(m_shapes.begin(), m_shapes.end(), shape);
+  if (pos != m_shapes.end())
+  {
+    m_shapes.erase(pos);
+    return true;
+  }
+
+  return false;
 }
 
 bool CCanvas::IsOpen() const
@@ -41,6 +63,15 @@ bool CCanvas::HandleEvents()
     SetEvent(event);
     SelectEvent(event);
     m_panel.HandleMouseEvent(event);
+
+    if (event.type == sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && event.key.code == sf::Keyboard::Z && !cmds.empty())
+    {
+      auto cmd = std::move(cmds.back());
+      cmds.pop_back();
+
+      ClearSelected();
+      cmd->Undo();
+    }
 
     if (m_tool)
     {
@@ -76,6 +107,9 @@ void CCanvas::SelectEvent(const sf::Event &event)
     else if (!shift)
       ClearSelected();
   }
+
+  if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+    StopDragging();
 }
 
 std::vector<std::shared_ptr<IDrawableShape>> CCanvas::GetAllSelectedShapes()
@@ -153,6 +187,7 @@ std::shared_ptr<IDrawableShape> CCanvas::hitTest(const sf::Vector2f &point) cons
 void CCanvas::ExecuteCommand(std::unique_ptr<ICommand> cmd)
 {
   cmd->Execute();
+  cmds.push_back(std::move(cmd));
 }
 
 void CCanvas::SetTool(std::unique_ptr<IToolState> tool)
@@ -218,10 +253,41 @@ void CCanvas::GroupSelected()
   m_selected.push_back(group);
 }
 
+std::shared_ptr<CompositeShape> CCanvas::GroupShapes(const std::vector<std::shared_ptr<IDrawableShape>> &shapes)
+{
+  auto group = std::make_shared<CompositeShape>();
+  for (const auto &s : shapes)
+  {
+    group->Add(s);
+  }
+
+  m_shapes.push_back(group);
+  m_selected.clear();
+  m_selected.push_back(group);
+  return group;
+}
+
 void CCanvas::UngroupSelected()
 {
   std::vector<std::shared_ptr<IDrawableShape>> toAdd;
   for (auto &s : m_selected)
+  {
+    auto g = std::dynamic_pointer_cast<CompositeShape>(s);
+    if (g)
+    {
+      for (auto &child : g->GetShapes())
+        toAdd.push_back(child);
+      m_shapes.erase(std::remove(m_shapes.begin(), m_shapes.end(), s), m_shapes.end());
+    }
+  }
+  m_shapes.insert(m_shapes.end(), toAdd.begin(), toAdd.end());
+  m_selected = toAdd;
+}
+
+void CCanvas::UngroupShapes(const std::vector<std::shared_ptr<IDrawableShape>> &shapes)
+{
+  std::vector<std::shared_ptr<IDrawableShape>> toAdd;
+  for (auto &s : shapes)
   {
     auto g = std::dynamic_pointer_cast<CompositeShape>(s);
     if (g)

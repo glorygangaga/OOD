@@ -4,7 +4,6 @@
 #include "include/tools/states/IToolState.hpp"
 #include "include/Constants.hpp"
 #include "include/CCanvas.hpp"
-#include "include/tools/commands/ChangeColorCommand.hpp"
 #include "include/tools/commands/ChangeColorCommandFill.hpp"
 
 class ChangeColorShapeState : public IToolState
