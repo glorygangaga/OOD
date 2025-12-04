@@ -25,7 +25,7 @@ public:
   sf::Vector2f GetMousePosition() const;
   sf::Vector2f GetLastMousePos() const;
   std::vector<std::shared_ptr<IDrawableShape>> GetSelected() const;
-  std::vector<std::shared_ptr<IDrawableShape>> GetAllSelectedShapes();
+  std::vector<std::shared_ptr<IDrawableShape>> GetAllSelectedShapes() const;
   void ExecuteCommand(std::unique_ptr<ICommand> cmd);
 
   void StopDragging();
@@ -52,11 +52,12 @@ private:
 
   void ClearSelected();
   void SetEvent(const sf::Event &event);
-  void SelectEvent(const sf::Event &event);
+  void SelectEvent();
   void StartDragging(const sf::Vector2f &pos);
   void SetTool(std::unique_ptr<IToolState> tool);
   void SelectShape(const std::shared_ptr<IDrawableShape> &shape);
   sf::RectangleShape RenderFrame(const sf::FloatRect &bounds) const;
   std::shared_ptr<IDrawableShape> hitTest(const sf::Vector2f &point) const;
-  void CollectShapes(const std::shared_ptr<IDrawableShape> &shape, std::vector<std::shared_ptr<IDrawableShape>> &outShapes);
+  void CollectShapes(const std::shared_ptr<IDrawableShape> &shape, std::vector<std::shared_ptr<IDrawableShape>> &outShapes) const;
+  void UndoState();
 };

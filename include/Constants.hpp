@@ -11,6 +11,7 @@ namespace window
   const std::string NAME = "Window";
 
   const float frame_thickness = 2.f;
+  const unsigned int FPS = 60;
 }
 
 namespace inputs

@@ -1,12 +1,13 @@
 #include "include/CCanvas.hpp"
 #include "include/tools/states/DragState.hpp"
 #include "include/tools/states/AddShapeState.hpp"
+#include <iostream>
 
 CCanvas::CCanvas(const unsigned int width, const unsigned int height, const std::string &titleName)
     : m_window(sf::VideoMode(width, height), titleName), m_panel(m_window, [this](std::unique_ptr<IToolState> tool)
                                                                  { this->SetTool(std::move(tool)); })
 {
-  m_window.setFramerateLimit(60);
+  m_window.setFramerateLimit(window::FPS);
 };
 
 bool CCanvas::Draw()
@@ -28,17 +29,15 @@ bool CCanvas::PushShape(const std::shared_ptr<IDrawableShape> &shape)
 
 bool CCanvas::RemoveShape(const std::shared_ptr<IDrawableShape> &shape)
 {
-  if (m_shapes.empty())
-    return false;
+  unsigned id = shape->GetId();
 
-  std::vector<std::shared_ptr<IDrawableShape>>::iterator pos = std::find(m_shapes.begin(), m_shapes.end(), shape);
-  if (pos != m_shapes.end())
-  {
-    m_shapes.erase(pos);
-    return true;
-  }
+  auto matchId = [&](const auto &s)
+  { return s->GetId() == id; };
 
-  return false;
+  m_shapes.erase(std::remove_if(m_shapes.begin(), m_shapes.end(), matchId), m_shapes.end());
+  m_selected.erase(std::remove_if(m_selected.begin(), m_selected.end(), matchId), m_selected.end());
+
+  return true;
 }
 
 bool CCanvas::IsOpen() const
@@ -61,18 +60,9 @@ bool CCanvas::HandleEvents()
     if (event.type == sf::Event::Closed)
       m_window.close();
     SetEvent(event);
-    SelectEvent(event);
+    SelectEvent();
     m_panel.HandleMouseEvent(event);
-
-    if (event.type == sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && event.key.code == sf::Keyboard::Z && !cmds.empty())
-    {
-      auto cmd = std::move(cmds.back());
-      cmds.pop_back();
-
-      ClearSelected();
-      cmd->Undo();
-    }
-
+    UndoState();
     if (m_tool)
     {
       m_tool->HandleEvent(this);
@@ -84,8 +74,9 @@ bool CCanvas::HandleEvents()
   return true;
 }
 
-void CCanvas::SelectEvent(const sf::Event &event)
+void CCanvas::SelectEvent()
 {
+  sf::Event event = GetEvent();
   if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
   {
     sf::Vector2f clickPos = GetMousePosition();
@@ -112,7 +103,7 @@ void CCanvas::SelectEvent(const sf::Event &event)
     StopDragging();
 }
 
-std::vector<std::shared_ptr<IDrawableShape>> CCanvas::GetAllSelectedShapes()
+std::vector<std::shared_ptr<IDrawableShape>> CCanvas::GetAllSelectedShapes() const
 {
   auto shapes = GetSelected();
   std::vector<std::shared_ptr<IDrawableShape>> result;
@@ -122,7 +113,7 @@ std::vector<std::shared_ptr<IDrawableShape>> CCanvas::GetAllSelectedShapes()
   return result;
 }
 
-void CCanvas::CollectShapes(const std::shared_ptr<IDrawableShape> &shape, std::vector<std::shared_ptr<IDrawableShape>> &outShapes)
+void CCanvas::CollectShapes(const std::shared_ptr<IDrawableShape> &shape, std::vector<std::shared_ptr<IDrawableShape>> &outShapes) const
 {
   auto group = std::dynamic_pointer_cast<CompositeShape>(shape);
   if (group)
@@ -130,6 +121,18 @@ void CCanvas::CollectShapes(const std::shared_ptr<IDrawableShape> &shape, std::v
       CollectShapes(s, outShapes);
   else
     outShapes.push_back(shape);
+}
+
+void CCanvas::UndoState()
+{
+  if (GetEvent().type == sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && GetEvent().key.code == sf::Keyboard::Z && !cmds.empty())
+  {
+    auto cmd = std::move(cmds.back());
+    cmds.pop_back();
+
+    ClearSelected();
+    cmd->Undo();
+  }
 }
 
 bool CCanvas::Render()

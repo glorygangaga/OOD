@@ -8,19 +8,16 @@ public:
   sf::Color GetFillColor() const;
   sf::Color GetOutlineColor() const;
   unsigned int GetThickness() const;
-  sf::Transform GetTransform() const;
   sf::Vector2f GetPosition() const;
 
   void SetFillColor(const sf::Color &newColor);
   void SetOutlineColor(const sf::Color &newColor);
   void SetThickness(const unsigned int newThickness);
-  void SetTransform(const sf::Transform &newTransform);
   void SetPosition(const sf::Vector2f &newPosition);
 
 private:
   sf::Color m_fillColor;
   sf::Color m_outlineColor;
   unsigned int m_thickness;
-  sf::Transform m_transform;
   sf::Vector2f m_position;
 };
