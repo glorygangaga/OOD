@@ -7,13 +7,13 @@
 class ChangeThicknessCommand : public ICommand
 {
 public:
-  ChangeThicknessCommand(const std::shared_ptr<IDrawableShape> &shape, const float newThickness);
+  ChangeThicknessCommand(const std::vector<std::shared_ptr<IDrawableShape>> &shapes, const float newThickness);
 
   void Execute() override;
   void Undo() override;
 
 private:
-  std::shared_ptr<IDrawableShape> m_shape;
+  std::vector<std::shared_ptr<IDrawableShape>> m_shapes;
   float m_newThickness;
-  ShapeMemento m_before;
+  std::vector<std::vector<ShapeMemento>> m_before;
 };

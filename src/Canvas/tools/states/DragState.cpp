@@ -28,6 +28,8 @@ void DragState::HandleEvent(CCanvas *canvas)
         delta.x = 0;
 
       s->Move(delta);
+      if (delta.x != 0 || delta.y != 0)
+        isDragged = true;
     }
 
     canvas->SetLastMousePos(currPos);
@@ -36,7 +38,7 @@ void DragState::HandleEvent(CCanvas *canvas)
 
   if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
   {
-    if (m_activeCommand)
+    if (m_activeCommand && isDragged)
       canvas->ExecuteCommand(std::move(m_activeCommand));
 
     return;

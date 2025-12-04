@@ -14,5 +14,5 @@ public:
 
 private:
   std::vector<std::shared_ptr<IDrawableShape>> m_shapes;
-  std::vector<ShapeMemento> m_before;
+  std::vector<std::vector<ShapeMemento>> m_before;
 };

@@ -16,8 +16,9 @@ public:
   bool Contains(const sf::Vector2f &point) const override;
   void Move(const sf::Vector2f &delta) override;
   void Accept(IShapeVisitor &visitor) override;
-  ShapeMemento SaveState() const override;
-  void RestoreState(const ShapeMemento &lastState) override;
+  std::vector<ShapeMemento> SaveState() const override;
+  void RestoreState(const std::vector<ShapeMemento> &lastState) override;
+  size_t GetStateSize() const override;
 
   sf::Vector2f GetP1() const;
   sf::Vector2f GetP2() const;

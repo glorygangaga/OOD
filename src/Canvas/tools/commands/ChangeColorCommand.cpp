@@ -16,7 +16,10 @@ void ChangeColorCommand::Execute()
 
 void ChangeColorCommand::Undo()
 {
-  OutlineColorChangeVisitor visitor(m_before[0].GetOutlineColor());
+  if (m_before.empty())
+    return;
+
+  OutlineColorChangeVisitor visitor(m_before[0][0].GetOutlineColor());
   for (auto &s : m_shapes)
     s->Accept(visitor);
 }

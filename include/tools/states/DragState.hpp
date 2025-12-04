@@ -13,5 +13,6 @@ public:
 
 private:
   sf::Vector2f m_startPos;
+  bool isDragged;
   std::unique_ptr<DragCommand> m_activeCommand;
 };

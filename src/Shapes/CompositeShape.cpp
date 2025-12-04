@@ -34,6 +34,26 @@ const std::vector<std::shared_ptr<IDrawableShape>> &CompositeShape::GetShapes() 
   return m_shapes;
 }
 
+std::vector<std::shared_ptr<IDrawableShape>> CompositeShape::GetAllShapes()
+{
+  std::vector<std::shared_ptr<IDrawableShape>> result;
+
+  for (auto s : m_shapes)
+    CollectShapes(s, result);
+
+  return result;
+}
+
+void CompositeShape::CollectShapes(const std::shared_ptr<IDrawableShape> &shape, std::vector<std::shared_ptr<IDrawableShape>> &outShapes)
+{
+  auto group = std::dynamic_pointer_cast<CompositeShape>(shape);
+  if (group)
+    for (const auto &s : group->GetShapes())
+      CollectShapes(s, outShapes);
+  else
+    outShapes.push_back(shape);
+}
+
 double CompositeShape::GetArea() const
 {
   double sum = 0;
@@ -63,14 +83,48 @@ void CompositeShape::Accept(IShapeVisitor &visitor)
   return;
 }
 
-ShapeMemento CompositeShape::SaveState() const
+std::vector<ShapeMemento> CompositeShape::SaveState() const
 {
-  return ShapeMemento();
+  std::vector<ShapeMemento> result;
+  result.reserve(GetStateSize());
+
+  ShapeMemento own;
+  result.push_back(own);
+
+  for (auto &child : m_shapes)
+  {
+    auto cs = child->SaveState();
+    result.insert(result.end(), cs.begin(), cs.end());
+  }
+
+  return result;
 }
 
-void CompositeShape::RestoreState(const ShapeMemento &lastState)
+void CompositeShape::RestoreState(const std::vector<ShapeMemento> &lastState)
 {
-  return;
+  size_t idx = 1;
+
+  for (auto &child : m_shapes)
+  {
+    const size_t sz = child->GetStateSize();
+
+    std::vector<ShapeMemento> sub(
+        lastState.begin() + idx,
+        lastState.begin() + idx + sz);
+
+    child->RestoreState(sub);
+
+    idx += sz;
+  }
+}
+
+size_t CompositeShape::GetStateSize() const
+{
+  size_t sum = 1;
+  for (auto &s : m_shapes)
+    sum += s->GetStateSize();
+
+  return sum;
 }
 
 sf::FloatRect CompositeShape::GetBounds() const

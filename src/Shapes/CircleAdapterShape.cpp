@@ -31,29 +31,28 @@ void CircleAdapterShape::Accept(IShapeVisitor &visitor)
   visitor.Visit(*this);
 }
 
-ShapeMemento CircleAdapterShape::SaveState() const
+std::vector<ShapeMemento> CircleAdapterShape::SaveState() const
 {
-  ShapeMemento state;
+  std::vector<ShapeMemento> states(1);
+
   const std::shared_ptr<sf::Shape> s = m_circle.GetShape();
 
-  state.SetFillColor(s->getFillColor());
-  state.SetOutlineColor(s->getOutlineColor());
-  state.SetThickness(s->getOutlineThickness());
-  state.SetTransform(s->getTransform());
+  states[0].SetFillColor(s->getFillColor());
+  states[0].SetOutlineColor(s->getOutlineColor());
+  states[0].SetThickness(s->getOutlineThickness());
+  states[0].SetPosition(s->getPosition());
 
-  return state;
+  return states;
 }
 
-void CircleAdapterShape::RestoreState(const ShapeMemento &lastState)
+void CircleAdapterShape::RestoreState(const std::vector<ShapeMemento> &lastState)
 {
   const std::shared_ptr<sf::Shape> s = m_circle.GetShape();
 
-  s->setFillColor(lastState.GetFillColor());
-  s->setOutlineColor(lastState.GetOutlineColor());
-  s->setOutlineThickness(lastState.GetThickness());
-
-  sf::Vector2f pos = lastState.GetTransform().transformPoint({0.f, 0.f});
-  s->setPosition(pos);
+  s->setFillColor(lastState[0].GetFillColor());
+  s->setOutlineColor(lastState[0].GetOutlineColor());
+  s->setOutlineThickness(lastState[0].GetThickness());
+  s->setPosition(lastState[0].GetPosition());
 }
 
 double CircleAdapterShape::GetRadius() const
@@ -69,4 +68,9 @@ bool CircleAdapterShape::Contains(const sf::Vector2f &point) const
 void CircleAdapterShape::Move(const sf::Vector2f &delta)
 {
   m_circle.GetShape()->move(delta);
+}
+
+size_t CircleAdapterShape::GetStateSize() const
+{
+  return 1;
 }

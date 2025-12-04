@@ -17,10 +17,14 @@ public:
   double GetPerimeter() const override;
   std::string ToString() const override;
   void Accept(IShapeVisitor &visitor) override;
-  ShapeMemento SaveState() const override;
-  void RestoreState(const ShapeMemento &lastState) override;
+  std::vector<ShapeMemento> SaveState() const override;
+  void RestoreState(const std::vector<ShapeMemento> &lastState) override;
+  size_t GetStateSize() const override;
 
   const std::vector<std::shared_ptr<IDrawableShape>> &GetShapes() const;
+  std::vector<std::shared_ptr<IDrawableShape>> GetAllShapes();
+  void CollectShapes(const std::shared_ptr<IDrawableShape> &shape, std::vector<std::shared_ptr<IDrawableShape>> &outShapes);
+
   sf::FloatRect GetBounds() const;
 
 private:

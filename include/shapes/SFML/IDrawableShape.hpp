@@ -13,6 +13,8 @@ public:
   virtual void Move(const sf::Vector2f &delta) = 0;
   virtual void Accept(IShapeVisitor &visitor) = 0;
 
-  virtual ShapeMemento SaveState() const = 0;
-  virtual void RestoreState(const ShapeMemento &lastState) = 0;
+  virtual std::vector<ShapeMemento> SaveState() const = 0;
+  virtual void RestoreState(const std::vector<ShapeMemento> &lastState) = 0;
+
+  virtual size_t GetStateSize() const = 0;
 };

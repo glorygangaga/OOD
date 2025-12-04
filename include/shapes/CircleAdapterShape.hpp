@@ -13,10 +13,11 @@ public:
   std::string ToString() const override;
   std::shared_ptr<sf::Shape> GetShape() const override;
   void Accept(IShapeVisitor &visitor) override;
-  ShapeMemento SaveState() const override;
-  void RestoreState(const ShapeMemento &lastState) override;
+  std::vector<ShapeMemento> SaveState() const override;
+  void RestoreState(const std::vector<ShapeMemento> &lastState) override;
   bool Contains(const sf::Vector2f &point) const override;
   void Move(const sf::Vector2f &delta) override;
+  size_t GetStateSize() const override;
 
   double GetRadius() const;
 

@@ -3,6 +3,7 @@
 DragCommand::DragCommand(const std::vector<std::shared_ptr<IDrawableShape>> &shapes) : m_shapes(shapes)
 {
   m_before.reserve(shapes.size());
+
   for (auto &s : shapes)
     m_before.push_back(s->SaveState());
 }

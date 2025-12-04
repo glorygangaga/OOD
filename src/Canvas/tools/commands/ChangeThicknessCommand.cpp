@@ -1,19 +1,25 @@
 #include "include/tools/commands/ChangeThicknessCommand.hpp"
 
-ChangeThicknessCommand::ChangeThicknessCommand(const std::shared_ptr<IDrawableShape> &shape, const float newThickness)
-    : m_shape(shape), m_newThickness(newThickness)
+ChangeThicknessCommand::ChangeThicknessCommand(const std::vector<std::shared_ptr<IDrawableShape>> &shapes, const float newThickness)
+    : m_shapes(shapes), m_newThickness(newThickness)
 {
-  m_before = shape->SaveState();
+  for (auto &s : shapes)
+    m_before.push_back(s->SaveState());
 }
 
 void ChangeThicknessCommand::Execute()
 {
   ThicknessChangeVisitor visitor(m_newThickness);
-  m_shape->Accept(visitor);
+  for (auto &s : m_shapes)
+    s->Accept(visitor);
 }
 
 void ChangeThicknessCommand::Undo()
 {
-  ThicknessChangeVisitor visitor(m_before.GetThickness());
-  m_shape->Accept(visitor);
+  if (m_before.empty())
+    return;
+
+  ThicknessChangeVisitor visitor(m_before[0][0].GetThickness());
+  for (auto &s : m_shapes)
+    s->Accept(visitor);
 }

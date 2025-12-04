@@ -7,6 +7,5 @@ void ChangeThicknessShapeState::HandleEvent(CCanvas *canvas)
   if (shapes.empty())
     return;
 
-  for (const auto s : shapes)
-    canvas->ExecuteCommand(std::make_unique<ChangeThicknessCommand>(s, m_thickness));
+  canvas->ExecuteCommand(std::make_unique<ChangeThicknessCommand>(shapes, m_thickness));
 }

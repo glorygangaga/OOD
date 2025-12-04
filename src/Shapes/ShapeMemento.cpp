@@ -20,6 +20,11 @@ sf::Transform ShapeMemento::GetTransform() const
   return m_transform;
 }
 
+sf::Vector2f ShapeMemento::GetPosition() const
+{
+  return m_position;
+}
+
 void ShapeMemento::SetFillColor(const sf::Color &newColor)
 {
   m_fillColor = newColor;
@@ -38,4 +43,9 @@ void ShapeMemento::SetThickness(const unsigned int newThickness)
 void ShapeMemento::SetTransform(const sf::Transform &newTransform)
 {
   m_transform = newTransform;
+}
+
+void ShapeMemento::SetPosition(const sf::Vector2f &newPosition)
+{
+  m_position = newPosition;
 }

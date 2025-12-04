@@ -51,29 +51,32 @@ void TriangleAdapterShape::Accept(IShapeVisitor &visitor)
   visitor.Visit(*this);
 }
 
-ShapeMemento TriangleAdapterShape::SaveState() const
+std::vector<ShapeMemento> TriangleAdapterShape::SaveState() const
 {
-  ShapeMemento state;
+  std::vector<ShapeMemento> states(1);
   const std::shared_ptr<sf::Shape> s = m_triangle.GetShape();
 
-  state.SetFillColor(s->getFillColor());
-  state.SetOutlineColor(s->getOutlineColor());
-  state.SetThickness(s->getOutlineThickness());
-  state.SetTransform(s->getTransform());
+  states[0].SetFillColor(s->getFillColor());
+  states[0].SetOutlineColor(s->getOutlineColor());
+  states[0].SetThickness(s->getOutlineThickness());
+  states[0].SetPosition(s->getPosition());
 
-  return state;
+  return states;
 }
 
-void TriangleAdapterShape::RestoreState(const ShapeMemento &lastState)
+void TriangleAdapterShape::RestoreState(const std::vector<ShapeMemento> &lastState)
 {
   const std::shared_ptr<sf::Shape> s = m_triangle.GetShape();
 
-  s->setFillColor(lastState.GetFillColor());
-  s->setOutlineColor(lastState.GetOutlineColor());
-  s->setOutlineThickness(lastState.GetThickness());
+  s->setFillColor(lastState[0].GetFillColor());
+  s->setOutlineColor(lastState[0].GetOutlineColor());
+  s->setOutlineThickness(lastState[0].GetThickness());
+  s->setPosition(lastState[0].GetPosition());
+}
 
-  sf::Vector2f pos = lastState.GetTransform().transformPoint({0.f, 0.f});
-  s->setPosition(pos);
+size_t TriangleAdapterShape::GetStateSize() const
+{
+  return 1;
 }
 
 double TriangleAdapterShape::GetLineLength(const sf::Vector2f &position1, const sf::Vector2f &position2) const
