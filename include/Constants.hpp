@@ -19,9 +19,14 @@ namespace inputs
   const std::string INPUT_FILENAME = "input.txt";
   const std::string OUTPUT_FILENAME = "output.txt";
 
+  const std::string BIN_FILENAME = "shapes.bin";
+  const std::string TEXT_FILENAME = "shapes.txt";
+  const std::string FONT_FILENAME = "arialmt.ttf";
+
   const std::string RECT = "RECTANGLE:";
   const std::string CIRCLE = "CIRCLE:";
   const std::string TRIANGLE = "TRIANGLE:";
+  const std::string COMPOSITE = "COMPOSITE:";
 
   inline const char *RECT_SCAN = " P1=%d,%d; P2=%d,%d";
   inline const char *CIRCLE_SCAN = " C=%d,%d; R=%d";
@@ -44,13 +49,17 @@ enum class SHAPES_TYPE
 {
   CIRCLE_T = 0,
   RECTANGLE_T,
-  TRIANGLE_T
+  TRIANGLE_T,
+  COMPOSITE_T,
+  NONE
 };
 
 const std::unordered_map<std::string, SHAPES_TYPE> SHAPES_MAP = {
     {inputs::RECT, SHAPES_TYPE::RECTANGLE_T},
     {inputs::CIRCLE, SHAPES_TYPE::CIRCLE_T},
-    {inputs::TRIANGLE, SHAPES_TYPE::TRIANGLE_T}};
+    {inputs::TRIANGLE, SHAPES_TYPE::TRIANGLE_T},
+    {inputs::COMPOSITE, SHAPES_TYPE::COMPOSITE_T},
+};
 
 enum class Action
 {
@@ -68,7 +77,9 @@ enum class Action
   FillColorBlack,
   AddRectangle,
   AddTriangle,
-  AddCircle
+  AddCircle,
+  LoadLastShapesBin,
+  LoadLastShapesTxt
 };
 
 const std::vector<std::pair<sf::String, Action>> BUTTONS = {
@@ -87,4 +98,6 @@ const std::vector<std::pair<sf::String, Action>> BUTTONS = {
     {"Triangle", Action::AddTriangle},
     {"Rectangle", Action::AddRectangle},
     {"Circle", Action::AddCircle},
+    {"Load bin", Action::LoadLastShapesBin},
+    {"Load txt", Action::LoadLastShapesTxt},
 };

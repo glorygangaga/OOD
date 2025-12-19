@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <fstream>
 #include "include/shapes/IShape.hpp"
 #include "include/shapes/Visitor/IShapeVisitor.hpp"
 #include "include/shapes/ShapeMemento.hpp"
@@ -21,8 +22,14 @@ public:
   virtual size_t GetStateSize() const = 0;
 
   unsigned int GetId() const { return m_id; }
+  bool InGroup() { return inGroup; }
+  void SetInGroup(const bool group) { inGroup = group; }
+
+  virtual void SerializeToBinary(std::ostream &out) const = 0;
+  virtual void SerializeToText(std::ostream &out) const = 0;
 
 private:
   unsigned int m_id;
+  bool inGroup;
   inline static unsigned int s_nextId = 0;
 };

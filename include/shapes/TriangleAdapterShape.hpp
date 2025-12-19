@@ -19,6 +19,8 @@ public:
   std::vector<ShapeMemento> SaveState() const override;
   void RestoreState(const std::vector<ShapeMemento> &lastState) override;
   size_t GetStateSize() const override;
+  void SerializeToBinary(std::ostream &out) const override;
+  void SerializeToText(std::ostream &out) const override;
 
   sf::Vector2f GetP1() const;
   sf::Vector2f GetP2() const;

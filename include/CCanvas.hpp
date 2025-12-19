@@ -6,6 +6,10 @@
 
 #include "include/tools/commands/ICommand.hpp"
 #include "include/tools/states/IToolState.hpp"
+#include "include/tools/save/IShapeStrategy.hpp"
+
+#include "include/tools/save/BinaryShapeStrategy.hpp"
+#include "include/tools/save/TxtShapeStrategy.hpp"
 
 #include "include/shapes/CompositeShape.hpp"
 #include "include/ui/Panel.hpp"
@@ -24,6 +28,7 @@ public:
   sf::Event GetEvent() const;
   sf::Vector2f GetMousePosition() const;
   sf::Vector2f GetLastMousePos() const;
+  std::vector<std::shared_ptr<IDrawableShape>> GetShapes() const;
   std::vector<std::shared_ptr<IDrawableShape>> GetSelected() const;
   std::vector<std::shared_ptr<IDrawableShape>> GetAllSelectedShapes() const;
   void ExecuteCommand(std::unique_ptr<ICommand> cmd);
@@ -35,12 +40,15 @@ public:
   void UngroupShapes(const std::vector<std::shared_ptr<IDrawableShape>> &shapes);
   void SetLastMousePos(const sf::Vector2f &pos);
 
+  void ClearCanvas();
+
 private:
   Panel m_panel;
   sf::Event m_event;
   bool m_dragging = false;
   sf::RenderWindow m_window;
   sf::Vector2f m_lastMousePos;
+  BinaryShapeStrategy m_strategy;
   std::unique_ptr<IToolState> m_tool;
   std::vector<std::shared_ptr<IDrawableShape>> m_shapes;
   std::vector<std::shared_ptr<IDrawableShape>> m_selected;
@@ -60,4 +68,6 @@ private:
   std::shared_ptr<IDrawableShape> hitTest(const sf::Vector2f &point) const;
   void CollectShapes(const std::shared_ptr<IDrawableShape> &shape, std::vector<std::shared_ptr<IDrawableShape>> &outShapes) const;
   void UndoState();
+  void SaveState();
+  void SaveToFile(const std::string &filename, IShapeStrategy &serializer);
 };

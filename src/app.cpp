@@ -10,6 +10,7 @@ bool Application::Start()
 
 bool Application::ProcessInput()
 {
+
   std::string shapeString;
   while (m_input >> shapeString)
   {
@@ -22,7 +23,6 @@ bool Application::ProcessInput()
     else
       return false;
   }
-
   return true;
 }
 

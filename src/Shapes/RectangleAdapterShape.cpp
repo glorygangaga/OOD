@@ -1,6 +1,6 @@
 #include "include/shapes/RectangleAdapterShape.hpp"
 
-RectangleAdapterShape::RectangleAdapterShape(const sf::Vector2f &p1, const sf::Vector2f &p2) : m_rectangle(p1, p2)
+RectangleAdapterShape::RectangleAdapterShape(const sf::Vector2f &p1, const sf::Vector2f &p2) : m_rectangle(p1, p2), m_p1(p1), m_p2(p2)
 {
   m_width = std::abs(p2.x - p1.x);
   m_height = std::abs(p2.y - p1.y);
@@ -70,6 +70,46 @@ void RectangleAdapterShape::RestoreState(const std::vector<ShapeMemento> &lastSt
 size_t RectangleAdapterShape::GetStateSize() const
 {
   return 1;
+}
+
+void RectangleAdapterShape::SerializeToBinary(std::ostream &out) const
+{
+  const auto shape = m_rectangle.GetShape();
+  SHAPES_TYPE type = SHAPES_TYPE::RECTANGLE_T;
+  out.write(reinterpret_cast<const char *>(&type), sizeof(type));
+
+  sf::Vector2f pos = shape->getPosition();
+  out.write(reinterpret_cast<const char *>(&pos.x), sizeof(pos.x));
+  out.write(reinterpret_cast<const char *>(&pos.y), sizeof(pos.y));
+
+  out.write(reinterpret_cast<const char *>(&m_p1.x), sizeof(m_p1.x));
+  out.write(reinterpret_cast<const char *>(&m_p1.y), sizeof(m_p1.y));
+  out.write(reinterpret_cast<const char *>(&m_p2.x), sizeof(m_p2.x));
+  out.write(reinterpret_cast<const char *>(&m_p2.y), sizeof(m_p2.y));
+
+  uint32_t color = shape->getOutlineColor().toInteger();
+  out.write(reinterpret_cast<const char *>(&color), sizeof(color));
+
+  float thickness = shape->getOutlineThickness();
+  out.write(reinterpret_cast<const char *>(&thickness), sizeof(thickness));
+
+  uint32_t colorFill = shape->getFillColor().toInteger();
+  out.write(reinterpret_cast<const char *>(&colorFill), sizeof(colorFill));
+}
+
+void RectangleAdapterShape::SerializeToText(std::ostream &out) const
+{
+  const auto shape = m_rectangle.GetShape();
+  out << inputs::RECT << ' ';
+
+  sf::Vector2f pos = shape->getPosition();
+  out << pos.x << ' ' << pos.y << ' ';
+  out << m_p1.x << ' ' << m_p1.y << ' ' << m_p2.x << ' ' << m_p2.y << ' ';
+
+  uint32_t color = shape->getOutlineColor().toInteger();
+  float thickness = shape->getOutlineThickness();
+  uint32_t colorFill = shape->getFillColor().toInteger();
+  out << color << ' ' << thickness << ' ' << colorFill << '\n';
 }
 
 double RectangleAdapterShape::GetWidth() const

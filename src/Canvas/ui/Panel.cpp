@@ -5,11 +5,13 @@
 #include "include/tools/states/ChangeThicknessShapeState.hpp"
 #include "include/tools/states/DragState.hpp"
 #include "include/tools/states/ChangeColorThickness.hpp"
+#include "include/tools/states/LoadBinState.hpp"
+#include "include/tools/states/LoadTxtState.hpp"
 
 Panel::Panel(sf::RenderWindow &window, std::function<void(std::unique_ptr<IToolState>)> setTool)
     : m_window(window), m_setTool(setTool)
 {
-  m_font.loadFromFile("arialmt.ttf");
+  m_font.loadFromFile(inputs::FONT_FILENAME);
   SetPanel();
 }
 
@@ -61,13 +63,9 @@ void Panel::DrawPanel()
 void Panel::HandleMouseEvent(const sf::Event &event)
 {
   for (auto &btn : m_buttons)
-  {
     if (btn.IsClicked(m_window, event))
-    {
       if (btn.onClick)
         btn.onClick();
-    }
-  }
 }
 
 std::unique_ptr<IToolState> Panel::GetState(const enum Action &action)
@@ -114,6 +112,10 @@ std::unique_ptr<IToolState> Panel::GetState(const enum Action &action)
     return std::make_unique<AddShapeState>(SHAPES_TYPE::RECTANGLE_T, GetPanelSize());
   case Action::AddTriangle:
     return std::make_unique<AddShapeState>(SHAPES_TYPE::TRIANGLE_T, GetPanelSize());
+  case Action::LoadLastShapesBin:
+    return std::make_unique<LoadBinState>();
+  case Action::LoadLastShapesTxt:
+    return std::make_unique<LoadTxtState>();
   default:
     return nullptr;
   }

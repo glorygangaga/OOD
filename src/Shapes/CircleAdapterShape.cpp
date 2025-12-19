@@ -1,7 +1,7 @@
 #include "include/shapes/CircleAdapterShape.hpp"
 
-CircleAdapterShape::CircleAdapterShape(const sf::Vector2f &center, const double radius)
-    : m_radius(radius), m_circle(center, radius) {};
+CircleAdapterShape::CircleAdapterShape(const sf::Vector2f &center, const float radius)
+    : m_radius(radius), m_center(center), m_circle(center, radius) {};
 
 double CircleAdapterShape::GetArea() const
 {
@@ -55,7 +55,7 @@ void CircleAdapterShape::RestoreState(const std::vector<ShapeMemento> &lastState
   s->setPosition(lastState[0].GetPosition());
 }
 
-double CircleAdapterShape::GetRadius() const
+float CircleAdapterShape::GetRadius() const
 {
   return m_radius;
 }
@@ -63,6 +63,45 @@ double CircleAdapterShape::GetRadius() const
 bool CircleAdapterShape::Contains(const sf::Vector2f &point) const
 {
   return GetShape()->getGlobalBounds().contains(point);
+}
+
+void CircleAdapterShape::SerializeToBinary(std::ostream &out) const
+{
+  const auto shape = m_circle.GetShape();
+  SHAPES_TYPE type = SHAPES_TYPE::CIRCLE_T;
+  out.write(reinterpret_cast<const char *>(&type), sizeof(type));
+
+  sf::Vector2f pos = shape->getPosition();
+  out.write(reinterpret_cast<const char *>(&pos.x), sizeof(pos.x));
+  out.write(reinterpret_cast<const char *>(&pos.y), sizeof(pos.y));
+
+  out.write(reinterpret_cast<const char *>(&m_center.x), sizeof(m_center.x));
+  out.write(reinterpret_cast<const char *>(&m_center.y), sizeof(m_center.y));
+
+  out.write(reinterpret_cast<const char *>(&m_radius), sizeof(m_radius));
+
+  uint32_t color = shape->getOutlineColor().toInteger();
+  out.write(reinterpret_cast<const char *>(&color), sizeof(color));
+
+  float thickness = shape->getOutlineThickness();
+  out.write(reinterpret_cast<const char *>(&thickness), sizeof(thickness));
+
+  uint32_t colorFill = shape->getFillColor().toInteger();
+  out.write(reinterpret_cast<const char *>(&colorFill), sizeof(colorFill));
+}
+
+void CircleAdapterShape::SerializeToText(std::ostream &out) const
+{
+  const auto shape = m_circle.GetShape();
+  out << inputs::CIRCLE << ' ';
+
+  sf::Vector2f pos = shape->getPosition();
+  out << pos.x << ' ' << pos.y << ' ' << m_center.x << ' ' << m_center.y << ' ' << m_radius << ' ';
+
+  uint32_t color = shape->getOutlineColor().toInteger();
+  float thickness = shape->getOutlineThickness();
+  uint32_t colorFill = shape->getFillColor().toInteger();
+  out << color << ' ' << thickness << ' ' << colorFill << '\n';
 }
 
 void CircleAdapterShape::Move(const sf::Vector2f &delta)

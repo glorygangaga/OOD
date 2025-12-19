@@ -79,6 +79,52 @@ size_t TriangleAdapterShape::GetStateSize() const
   return 1;
 }
 
+void TriangleAdapterShape::SerializeToBinary(std::ostream &out) const
+{
+  const auto shape = m_triangle.GetShape();
+  SHAPES_TYPE type = SHAPES_TYPE::TRIANGLE_T;
+  out.write(reinterpret_cast<const char *>(&type), sizeof(type));
+
+  sf::Vector2f pos = shape->getPosition();
+  out.write(reinterpret_cast<const char *>(&pos.x), sizeof(pos.x));
+  out.write(reinterpret_cast<const char *>(&pos.y), sizeof(pos.y));
+
+  sf::Vector2f p1 = GetP1(), p2 = GetP2(), p3 = GetP3();
+
+  out.write(reinterpret_cast<const char *>(&m_p1.x), sizeof(m_p1.x));
+  out.write(reinterpret_cast<const char *>(&m_p1.y), sizeof(m_p1.y));
+  out.write(reinterpret_cast<const char *>(&m_p2.x), sizeof(m_p2.x));
+  out.write(reinterpret_cast<const char *>(&m_p2.y), sizeof(m_p2.y));
+  out.write(reinterpret_cast<const char *>(&m_p3.x), sizeof(m_p3.x));
+  out.write(reinterpret_cast<const char *>(&m_p3.y), sizeof(m_p3.y));
+
+  uint32_t color = shape->getOutlineColor().toInteger();
+  out.write(reinterpret_cast<const char *>(&color), sizeof(color));
+
+  float thickness = shape->getOutlineThickness();
+  out.write(reinterpret_cast<const char *>(&thickness), sizeof(thickness));
+
+  uint32_t colorFill = shape->getFillColor().toInteger();
+  out.write(reinterpret_cast<const char *>(&colorFill), sizeof(colorFill));
+}
+
+void TriangleAdapterShape::SerializeToText(std::ostream &out) const
+{
+  const auto shape = m_triangle.GetShape();
+  out << inputs::TRIANGLE << ' ';
+
+  sf::Vector2f pos = shape->getPosition();
+  out << pos.x << ' ' << pos.y << ' ';
+
+  sf::Vector2f p1 = GetP1(), p2 = GetP2(), p3 = GetP3();
+  out << p1.x << ' ' << p1.y << ' ' << p2.x << ' ' << p2.y << ' ' << p3.x << ' ' << p3.y << ' ';
+
+  uint32_t color = shape->getOutlineColor().toInteger();
+  float thickness = shape->getOutlineThickness();
+  uint32_t colorFill = shape->getFillColor().toInteger();
+  out << color << ' ' << thickness << ' ' << colorFill << '\n';
+}
+
 double TriangleAdapterShape::GetLineLength(const sf::Vector2f &position1, const sf::Vector2f &position2) const
 {
   const double powX = std::pow(position1.x - position2.x, 2);

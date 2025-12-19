@@ -20,6 +20,8 @@ public:
   std::vector<ShapeMemento> SaveState() const override;
   void RestoreState(const std::vector<ShapeMemento> &lastState) override;
   size_t GetStateSize() const override;
+  void SerializeToBinary(std::ostream &out) const override;
+  void SerializeToText(std::ostream &out) const override;
 
   const std::vector<std::shared_ptr<IDrawableShape>> &GetShapes() const;
   std::vector<std::shared_ptr<IDrawableShape>> GetAllShapes();

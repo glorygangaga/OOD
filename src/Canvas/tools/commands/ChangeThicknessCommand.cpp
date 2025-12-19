@@ -19,7 +19,9 @@ void ChangeThicknessCommand::Undo()
   if (m_before.empty())
     return;
 
-  ThicknessChangeVisitor visitor(m_before[0][0].GetThickness());
-  for (auto &s : m_shapes)
-    s->Accept(visitor);
+  for (size_t i = 0; i < m_shapes.size(); i++)
+  {
+    ThicknessChangeVisitor visitor(m_before[i][0].GetThickness());
+    m_shapes[i]->Accept(visitor);
+  }
 }

@@ -6,7 +6,7 @@
 class CircleAdapterShape : public IDrawableShape
 {
 public:
-  CircleAdapterShape(const sf::Vector2f &center, const double radius);
+  CircleAdapterShape(const sf::Vector2f &center, const float radius);
 
   double GetArea() const override;
   double GetPerimeter() const override;
@@ -16,12 +16,15 @@ public:
   std::vector<ShapeMemento> SaveState() const override;
   void RestoreState(const std::vector<ShapeMemento> &lastState) override;
   bool Contains(const sf::Vector2f &point) const override;
+  void SerializeToBinary(std::ostream &out) const override;
+  void SerializeToText(std::ostream &out) const override;
   void Move(const sf::Vector2f &delta) override;
   size_t GetStateSize() const override;
 
-  double GetRadius() const;
+  float GetRadius() const;
 
 private:
   SfmlCircle m_circle;
-  double m_radius;
+  sf::Vector2f m_center;
+  float m_radius;
 };

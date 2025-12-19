@@ -16,7 +16,9 @@ void ChangeColorCommandFill::Execute()
 
 void ChangeColorCommandFill::Undo()
 {
-  ColorChangeVisitor visitor(m_before[0][0].GetFillColor());
-  for (auto &s : m_shapes)
-    s->Accept(visitor);
+  for (size_t i = 0; i < m_shapes.size(); i++)
+  {
+    ColorChangeVisitor visitor(m_before[i][0].GetFillColor());
+    m_shapes[i]->Accept(visitor);
+  }
 }

@@ -14,6 +14,6 @@ public:
 
 private:
   std::vector<std::shared_ptr<IDrawableShape>> m_shapes;
-  sf::Color m_newColor;
   std::vector<std::vector<ShapeMemento>> m_before;
+  sf::Color m_newColor;
 };

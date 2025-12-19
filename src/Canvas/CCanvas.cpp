@@ -1,7 +1,6 @@
 #include "include/CCanvas.hpp"
 #include "include/tools/states/DragState.hpp"
 #include "include/tools/states/AddShapeState.hpp"
-#include <iostream>
 
 CCanvas::CCanvas(const unsigned int width, const unsigned int height, const std::string &titleName)
     : m_window(sf::VideoMode(width, height), titleName), m_panel(m_window, [this](std::unique_ptr<IToolState> tool)
@@ -63,6 +62,7 @@ bool CCanvas::HandleEvents()
     SelectEvent();
     m_panel.HandleMouseEvent(event);
     UndoState();
+    SaveState();
     if (m_tool)
     {
       m_tool->HandleEvent(this);
@@ -132,6 +132,23 @@ void CCanvas::UndoState()
 
     ClearSelected();
     cmd->Undo();
+  }
+}
+
+void CCanvas::SaveState()
+{
+  if (GetEvent().type == sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+  {
+    if (GetEvent().key.code == sf::Keyboard::B)
+    {
+      BinaryShapeStrategy s;
+      SaveToFile(inputs::BIN_FILENAME, s);
+    }
+    else if (GetEvent().key.code == sf::Keyboard::T)
+    {
+      TxtShapeStrategy s;
+      SaveToFile(inputs::TEXT_FILENAME, s);
+    }
   }
 }
 
@@ -240,16 +257,30 @@ void CCanvas::SetLastMousePos(const sf::Vector2f &pos)
   m_lastMousePos = pos;
 }
 
+void CCanvas::ClearCanvas()
+{
+  m_selected.clear();
+  m_shapes.clear();
+}
+
 sf::Vector2f CCanvas::GetLastMousePos() const
 {
   return m_lastMousePos;
+}
+
+std::vector<std::shared_ptr<IDrawableShape>> CCanvas::GetShapes() const
+{
+  return m_shapes;
 }
 
 void CCanvas::GroupSelected()
 {
   auto group = std::make_shared<CompositeShape>();
   for (const auto &s : m_selected)
+  {
     group->Add(s);
+    s->SetInGroup(true);
+  }
 
   m_shapes.push_back(group);
   m_selected.clear();
@@ -262,6 +293,7 @@ std::shared_ptr<CompositeShape> CCanvas::GroupShapes(const std::vector<std::shar
   for (const auto &s : shapes)
   {
     group->Add(s);
+    s->SetInGroup(true);
   }
 
   m_shapes.push_back(group);
@@ -279,7 +311,10 @@ void CCanvas::UngroupSelected()
     if (g)
     {
       for (auto &child : g->GetShapes())
+      {
         toAdd.push_back(child);
+        child->SetInGroup(false);
+      }
       m_shapes.erase(std::remove(m_shapes.begin(), m_shapes.end(), s), m_shapes.end());
     }
   }
@@ -296,7 +331,10 @@ void CCanvas::UngroupShapes(const std::vector<std::shared_ptr<IDrawableShape>> &
     if (g)
     {
       for (auto &child : g->GetShapes())
+      {
         toAdd.push_back(child);
+        child->SetInGroup(false);
+      }
       m_shapes.erase(std::remove(m_shapes.begin(), m_shapes.end(), s), m_shapes.end());
     }
   }
@@ -312,4 +350,9 @@ sf::Event CCanvas::GetEvent() const
 void CCanvas::SetEvent(const sf::Event &event)
 {
   m_event = event;
+}
+
+void CCanvas::SaveToFile(const std::string &filename, IShapeStrategy &serializer)
+{
+  serializer.Save(m_shapes, filename);
 }

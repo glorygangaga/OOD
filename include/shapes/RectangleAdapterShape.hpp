@@ -18,11 +18,14 @@ public:
   std::vector<ShapeMemento> SaveState() const override;
   void RestoreState(const std::vector<ShapeMemento> &lastState) override;
   size_t GetStateSize() const override;
+  void SerializeToBinary(std::ostream &out) const override;
+  void SerializeToText(std::ostream &out) const override;
 
   double GetWidth() const;
   double GetHeight() const;
 
 private:
   SfmlRectangle m_rectangle;
+  sf::Vector2f m_p1, m_p2;
   double m_width, m_height;
 };
